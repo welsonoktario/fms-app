@@ -1,14 +1,14 @@
 {
   "expo": {
-    "name": "fms-app",
-    "slug": "fms-app",
+    "name": "Fleet Management System NL",
+    "slug": "fms-nl",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "myapp",
+    "icon": "./src/assets/images/icon.png",
+    "scheme": "fmsnl",
     "userInterfaceStyle": "automatic",
     "splash": {
-      "image": "./assets/images/splash.png",
+      "image": "./src/assets/images/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -17,17 +17,35 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.technivine.fms"
     },
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      "expo-secure-store",
+      [
+        "expo-font",
+        {
+          "fonts": [
+            "./src/assets/fonts/Geist-Thin.ttf",
+            "./src/assets/fonts/Geist-UltraLight.ttf",
+            "./src/assets/fonts/Geist-Light.ttf",
+            "./src/assets/fonts/Geist-Regular.ttf",
+            "./src/assets/fonts/Geist-Medium.ttf",
+            "./src/assets/fonts/Geist-SemiBold.ttf",
+            "./src/assets/fonts/Geist-Bold.ttf",
+            "./src/assets/fonts/Geist-Black.ttf",
+            "./src/assets/fonts/Geist-UltraBlack.ttf"
+          ]
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
