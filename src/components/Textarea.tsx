@@ -16,7 +16,7 @@ type TextAreaProps = TextInputProps & {
 const TextArea = forwardRef<TextInput, TextAreaProps>(({ style, ...props }, ref) => {
   const colorScheme = useColorScheme();
   const [focused, setFocused] = useState(false);
-  const placeholderTextColor = Colors[colorScheme || "light"].muted;
+  const placeholderTextColor = colorScheme === "dark" ? "hsl(0, 0%, 38%)" : Colors.light.muted;
   const textColor = Colors[colorScheme || "light"].text;
   const backgroundColor = Colors[colorScheme || "light"].background;
 

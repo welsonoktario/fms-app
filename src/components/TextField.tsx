@@ -18,11 +18,13 @@ const TextField: React.FC<TextFieldProps> = React.forwardRef<TextInput, TextFiel
   ({ style, ...props }, ref) => {
     const scheme = useColorScheme();
     const [focused, setFocused] = useState(false);
+    const placeholderTextColor = scheme === "dark" ? "hsl(0, 0%, 38%)" : Colors.light.muted;
 
     return (
       <TextInput
         ref={ref}
         selectionColor={Colors[scheme || "light"].primary}
+        placeholderTextColor={placeholderTextColor}
         style={[
           styles.input,
           {

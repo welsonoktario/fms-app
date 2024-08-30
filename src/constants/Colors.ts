@@ -27,7 +27,7 @@ export const Colors = {
     muted: "hsl(0, 0%, 14.9%)",
     destructive: "hsl(0, 35%, 45%)",
     text: "hsl(0, 0%, 98%)",
-    background: "hsl(0, 0%, 3.9%)",
+    background: "hsl(0, 0%, 7%)",
     border: "hsl(0, 0%, 14.9%)",
     ring: "hsl(0, 0%, 83.1%)",
     tint: tintColorDark,

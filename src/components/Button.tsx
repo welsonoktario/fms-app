@@ -218,14 +218,14 @@ const sizeButtonStyles: Record<ButtonSize, ViewStyle> = {
   default: { height: 36, paddingHorizontal: 16 },
   sm: { height: 32, paddingHorizontal: 12 },
   lg: { height: 40, paddingHorizontal: 32 },
-  icon: { width: 36, height: 36, borderRadius: 18 },
+  icon: { width: 36, height: 36, borderRadius: 9999 },
 };
 
 const sizeTextStyles: Record<ButtonSize, TextStyle> = {
   default: { fontSize: 16 },
   sm: { fontSize: 12 },
   lg: { fontSize: 20 },
-  icon: { fontSize: 14 },
+  icon: { fontSize: 16 },
 };
 
 export { Button };

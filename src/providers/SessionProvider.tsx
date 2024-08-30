@@ -22,10 +22,16 @@ export function SessionProvider({ children }: PropsWithChildren) {
       value={{
         signIn: () => {
           setSession("xxx");
+          if (router.canGoBack()) {
+            router.dismissAll();
+          }
           router.replace("/");
         },
         signOut: () => {
           setSession(null);
+          if (router.canGoBack()) {
+            router.dismissAll();
+          }
           router.replace("/auth/sign-in");
         },
         session,
