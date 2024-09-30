@@ -1,6 +1,6 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from "@react-navigation/native";
+import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Stack } from "expo-router";
+import { Link, Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 
@@ -8,9 +8,11 @@ import { Header } from "@/components";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useSession } from "@/hooks/useSession";
 import { SessionProvider } from "@/providers/SessionProvider";
+import { darkTheme, lightTheme } from "@/utils";
 import { QueryClient } from "@tanstack/query-core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { useEffect } from "react";
+import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export const unstable_settings = {
@@ -48,29 +50,48 @@ export default function RootLayout() {
   }
 
   return (
-    <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={colorScheme === "dark" ? darkTheme : lightTheme}>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
           <SafeAreaProvider>
-            <Stack screenOptions={{ header: (props) => <Header {...props} /> }}>
-              <Stack.Screen
-                name="index"
-                options={{
-                  headerTitle: "Menu",
-                  headerBackButtonMenuEnabled: false,
-                  headerBackVisible: false,
-                }}
-              />
+            <AutocompleteDropdownContextProvider>
+              <Stack screenOptions={{ header: (props) => <Header {...props} /> }}>
+                <Stack.Screen
+                  name="index"
+                  options={{
+                    headerTitle: "Menu",
+                    headerBackButtonMenuEnabled: false,
+                    headerBackVisible: false,
+                  }}
+                />
 
-              <Stack.Screen name="auth/sign-in" options={{ headerShown: false }} />
+                <Stack.Screen name="auth/sign-in" options={{ headerShown: false }} />
 
-              <Stack.Screen
-                name="reports/index"
-                options={{ headerTitle: "Checklist Unit" }}
-              />
+                <Stack.Screen
+                  name="reports/index"
+                  options={{
+                    headerTitle: "Checklist Unit",
+                    headerRight: () => {
+                      return <Link href="/reports/create">Tambah</Link>;
+                    },
+                  }}
+                />
 
-              <Stack.Screen name="+not-found" />
-            </Stack>
+                <Stack.Screen
+                  name="reports/create"
+                  options={{
+                    headerTitle: "Tambah Checklist Unit",
+                  }}
+                />
+
+                <Stack.Screen
+                  name="reports/detail/[id]"
+                  options={{ headerTitle: "Detail Unit" }}
+                />
+
+                <Stack.Screen name="+not-found" />
+              </Stack>
+            </AutocompleteDropdownContextProvider>
           </SafeAreaProvider>
         </SessionProvider>
       </QueryClientProvider>

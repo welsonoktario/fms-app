@@ -11,7 +11,7 @@ import {
   View,
   type ViewProps,
   type ViewStyle,
-  useColorScheme
+  useColorScheme,
 } from "react-native";
 
 type CardProps = PressableProps & {
@@ -101,7 +101,6 @@ const styles = StyleSheet.create({
   cardHeader: {
     flexDirection: "column",
     padding: 16,
-    marginBottom: 8,
   },
   cardTitle: {
     fontFamily: "Geist-SemiBold",

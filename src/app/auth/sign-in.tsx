@@ -1,11 +1,14 @@
 import { Button, Text, TextField } from "@/components";
 import { useSession } from "@/hooks/useSession";
 import { Redirect } from "expo-router";
+import { useState } from "react";
 import { View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function SignIn() {
   const { session, signIn } = useSession();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   if (session) {
     return <Redirect href="/" />;
@@ -49,6 +52,8 @@ export default function SignIn() {
               autoComplete="email"
               keyboardType="email-address"
               autoCapitalize="none"
+              value={email}
+              onChangeText={setEmail}
             />
           </View>
           <View style={{ flexDirection: "column", rowGap: 4 }}>
@@ -57,11 +62,18 @@ export default function SignIn() {
               placeholder="******"
               textContentType="password"
               autoComplete="password"
+              value={password}
+              onChangeText={setPassword}
               secureTextEntry
             />
           </View>
 
-          <Button onPress={signIn} style={{ marginTop: 8 }}>
+          <Button
+            onPress={() => {
+              signIn(email, password);
+            }}
+            style={{ marginTop: 8 }}
+          >
             Sign In
           </Button>
         </View>

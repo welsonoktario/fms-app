@@ -16,7 +16,7 @@ type TextAreaProps = TextInputProps & {
 const TextArea = forwardRef<TextInput, TextAreaProps>(({ style, ...props }, ref) => {
   const colorScheme = useColorScheme();
   const [focused, setFocused] = useState(false);
-  const placeholderTextColor = colorScheme === "dark" ? "hsl(0, 0%, 38%)" : Colors.light.muted;
+  const placeholderTextColor = Colors[colorScheme || "light"].mutedForeground;
   const textColor = Colors[colorScheme || "light"].text;
   const backgroundColor = Colors[colorScheme || "light"].background;
 
@@ -50,14 +50,10 @@ const styles = StyleSheet.create({
     minHeight: 60,
     width: "100%",
     borderRadius: 8,
-    borderWidth: 1,
+    borderWidth: 0.8,
     paddingVertical: 8,
     paddingHorizontal: 12,
     fontSize: 16,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
     textAlignVertical: "top",
     fontFamily: "Geist-Regular",
   },

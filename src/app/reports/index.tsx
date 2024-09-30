@@ -1,30 +1,52 @@
 import { View } from "react-native";
 
-import { Button, Text } from "@/components";
+import { Button, UnitCard } from "@/components";
 import { useSession } from "@/hooks/useSession";
+import type { Unit } from "@/types";
+import { $fetch } from "@/utils";
+import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
+
+const getUnits = async (session: string) => {
+  const res = await $fetch<Unit & { today_report: any }>(
+    "http://10.10.0.58:8000/api/daily-monitoring-units",
+    {
+      headers: {
+        Authorization: `Bearer ${session}`,
+      },
+    }
+  );
+
+  if (res.status === "fail") {
+    throw new Error(res.message);
+  }
+  return res.data;
+};
 
 export default function Reports() {
-  const { signOut } = useSession();
+  const router = useRouter();
+  const { session, signOut } = useSession();
+
+  const { isPending, isError, data, error } = useQuery({
+    queryKey: ["reports"],
+    queryFn: () => getUnits(session!),
+  });
 
   return (
     <View
       style={{
         flex: 1,
-        padding: 20,
+        paddingHorizontal: 20,
       }}
     >
-      <View
-        style={{
-          flex: 1,
-          justifyContent: "center",
-          alignItems: "center",
+      {!isPending && data ? <UnitCard unit={data} /> : null}
+      <Button
+        onPress={() => {
+          router.navigate("/reports/create");
         }}
       >
-        <Text>Hello world!</Text>
-        <Button variant="destructiveGhost" onPress={signOut}>
-          Sign Out
-        </Button>
-      </View>
+        Tambah
+      </Button>
     </View>
   );
 }

@@ -13,17 +13,12 @@ export default function Menu() {
   }
 
   return (
-    <View style={{ flex: 1, padding: 20, marginTop: 40 }}>
-      <Block gap={10} style={{ maxHeight: 180 }} row>
-        <Card onPress={() => router.navigate("/reports")} style={{ flex: 1 }}>
-          <CardHeader>
-            <CardTitle>Lapor</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Text variant="body2">Hello World!</Text>
-          </CardContent>
-        </Card>
-      </Block>
+    <View style={{ flex: 1, paddingHorizontal: 20 }}>
+      <Card onPress={() => router.navigate("/reports")} style={{ width: "100%" }}>
+        <CardHeader>
+          <CardTitle>Checklist Unit</CardTitle>
+        </CardHeader>
+      </Card>
     </View>
   );
 }

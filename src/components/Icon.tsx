@@ -3,7 +3,7 @@ import { type StyleProp, type TextStyle, useColorScheme } from "react-native";
 import VectorIcon from "react-native-vector-icons/MaterialCommunityIcons";
 
 type IconProps = {
-  name: string;
+  name: typeof VectorIcon.name;
   size?: number;
   color?: string;
   style?: StyleProp<TextStyle>;

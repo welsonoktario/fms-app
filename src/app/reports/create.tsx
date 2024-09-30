@@ -1,4 +1,5 @@
 import {
+  AutoComplete,
   Button,
   RadioGroup,
   RadioGroupItem,
@@ -8,7 +9,7 @@ import {
 } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
-import type { UnitCondition, UnitReport } from "@/types";
+import type { Unit, UnitCondition } from "@/types";
 import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
@@ -16,13 +17,10 @@ import { useLocalSearchParams } from "expo-router";
 import { Fragment } from "react";
 import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { View } from "react-native";
+import type { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { z } from "zod";
 
 const schema = z.object({
-  name: z.coerce.string({
-    required_error: "Nama Lengkap tidak boleh kosong",
-    invalid_type_error: "Nama Lengkap harus berupa teks",
-  }),
   nik: z.coerce.string().regex(/^\d{16}$/, "NIK harus 16 digit angka"),
   conditions: z.array(
     z.object({
@@ -32,6 +30,7 @@ const schema = z.object({
       issue: z.string().nullable(),
     })
   ),
+  issues: z.string().nullable(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -40,19 +39,17 @@ export default function ReportDetail() {
   const { id } = useLocalSearchParams();
   const { session } = useSession();
 
-  const getUnitReport = async () => {
-    const res = await $fetch<UnitReport>(
-      `http://10.10.0.58:8000/api/daily-monitoring-units/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${session}`,
-        },
-      }
-    );
+  const getUnit = async () => {
+    const res = await $fetch<Unit>(`http://10.10.0.58:8000/api/units/${id}`, {
+      headers: {
+        Authorization: `Bearer ${session}`,
+      },
+    });
 
     if (res.status !== "ok") {
       throw new Error(res.message);
     }
+    console.log(res.data);
 
     return res.data;
   };
@@ -80,10 +77,22 @@ export default function ReportDetail() {
     return res.data;
   };
 
-  const reportQuery = useQuery({
+  const getDrivers = async (q = "") => {
+    const res = await $fetch<AutocompleteDropdownItem[]>(
+      "http://10.10.0.58:8000/api/drivers?q=" + q
+    );
+
+    if (res.status !== "ok") {
+      throw new Error(res.message);
+    }
+
+    return res.data;
+  };
+
+  const unitQuery = useQuery({
     queryKey: ["report", id],
     enabled: !!id && !!session,
-    queryFn: getUnitReport,
+    queryFn: getUnit,
   });
   const unitConditionsQuery = useQuery({
     queryKey: ["unitConditions"],
@@ -94,9 +103,9 @@ export default function ReportDetail() {
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
-      name: "",
       nik: "",
-      conditions: reportQuery.data?.conditions || [],
+      conditions: [],
+      issues: null,
     },
   });
 
@@ -110,6 +119,8 @@ export default function ReportDetail() {
     console.log(values);
   };
 
+  console.log(unitQuery.data);
+
   return (
     <View
       style={{
@@ -120,34 +131,15 @@ export default function ReportDetail() {
         paddingBottom: 20,
       }}
     >
-      <Controller
-        control={form.control}
-        name="name"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View
-            style={{
-              flexDirection: "column",
-              rowGap: 4,
-            }}
-          >
-            <Text variant="body1">Nama Lengkap</Text>
-            <TextField
-              placeholder="user@gmail.com"
-              textContentType="emailAddress"
-              autoComplete="email"
-              keyboardType="email-address"
-              autoCapitalize="none"
-              onBlur={onBlur}
-              onChangeText={onChange}
-              value={value}
-            />
-            {form.formState.errors.name && (
-              <Text style={{ color: Colors.dark.destructive }}>
-                {form.formState.errors.name.message}
-              </Text>
-            )}
-          </View>
-        )}
+      <Text variant="body1">Kode Unit</Text>
+      <TextField
+        placeholder="user@gmail.com"
+        textContentType="emailAddress"
+        autoComplete="email"
+        keyboardType="email-address"
+        autoCapitalize="none"
+        value={unitQuery.data?.asset_code ?? ""}
+        readOnly
       />
 
       <Controller
@@ -161,7 +153,7 @@ export default function ReportDetail() {
             }}
           >
             <Text variant="body1">NIK</Text>
-            <TextField
+            {/* <TextField
               placeholder="user@gmail.com"
               keyboardType="numeric"
               autoCapitalize="none"
@@ -171,6 +163,15 @@ export default function ReportDetail() {
                 onChange(text);
               }}
               value={value}
+            /> */}
+            <AutoComplete
+              fetchSuggestions={getDrivers}
+              placeholder="Ketik NIK..."
+              debounceTime={500}
+              onItemSelected={(item) => {
+                onChange(item?.id);
+              }}
+              inputContainerStyle={{ marginTop: 32 }}
             />
             {form.formState.errors.nik && (
               <Text style={{ color: Colors.dark.destructive }}>
@@ -254,6 +255,34 @@ export default function ReportDetail() {
             ) : null}
           </Fragment>
         ))}
+
+      <Controller
+        control={form.control}
+        name="issues"
+        render={({ field: { onChange, onBlur, value } }) => (
+          <View
+            style={{
+              flexDirection: "column",
+              rowGap: 4,
+            }}
+          >
+            <Text variant="body1">Kendala (jika ada)</Text>
+            <TextArea
+              placeholder="Isikan kendala"
+              onBlur={onBlur}
+              onChangeText={(text) => {
+                onChange(text);
+              }}
+              value={value || undefined}
+            />
+            {form.formState.errors.issues && (
+              <Text style={{ color: Colors.dark.destructive }}>
+                {form.formState.errors.issues.message}
+              </Text>
+            )}
+          </View>
+        )}
+      />
 
       <Button
         onPress={() => {
