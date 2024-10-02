@@ -11,7 +11,7 @@ export default function SignIn() {
   const [password, setPassword] = useState("");
 
   if (session) {
-    return <Redirect href="/" />;
+    return <Redirect href="/(tabs)" />;
   }
 
   return (
@@ -30,7 +30,7 @@ export default function SignIn() {
         }}
       >
         <Text variant="h1" style={{ textAlign: "center", paddingTop: "20%" }}>
-          Sign In
+          Checklist Unit
         </Text>
 
         <View
@@ -74,7 +74,7 @@ export default function SignIn() {
             }}
             style={{ marginTop: 8 }}
           >
-            Sign In
+            Masuk
           </Button>
         </View>
       </View>

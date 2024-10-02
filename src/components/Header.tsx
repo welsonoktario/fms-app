@@ -30,8 +30,8 @@ export function Header(props: NativeStackHeaderProps) {
           onPress={() => props.navigation.goBack()}
           style={({ pressed }) => ({
             flex: 1,
-            maxHeight: 36,
-            maxWidth: 36,
+            maxHeight: 32,
+            maxWidth: 32,
             paddingRight: 2,
             alignItems: "center",
             justifyContent: "center",
@@ -46,7 +46,7 @@ export function Header(props: NativeStackHeaderProps) {
         </Pressable>
       )}
       {props.options.headerTitle ? (
-        <Text variant="h3" style={{ height: 32 }}>
+        <Text variant="h4" style={{ height: 28 }}>
           {String(props.options.headerTitle)}
         </Text>
       ) : null}

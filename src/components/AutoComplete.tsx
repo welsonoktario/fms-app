@@ -1,10 +1,13 @@
+import { Icon } from "@/components/Icon";
 import { Colors } from "@/constants/Colors";
 import { useCallback, useState } from "react";
 import {
   Dimensions,
+  type NativeSyntheticEvent,
   Platform,
   StyleSheet,
   Text,
+  type TextInputFocusEventData,
   View,
   useColorScheme,
 } from "react-native";
@@ -20,6 +23,7 @@ type AutocompleteProps = {
   debounceTime?: number;
   inputStyle?: object;
   inputContainerStyle?: object;
+  onBlur?: (e: NativeSyntheticEvent<TextInputFocusEventData>) => void;
 };
 
 export const AutoComplete: React.FC<AutocompleteProps> = ({
@@ -29,6 +33,7 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
   debounceTime = 600,
   inputStyle = {},
   inputContainerStyle = {},
+  onBlur,
 }) => {
   const [loading, setLoading] = useState(false);
   const [suggestionsList, setSuggestionsList] = useState<
@@ -60,13 +65,14 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
   return (
     <View style={styles.container}>
       <AutocompleteDropdown
-        direction={Platform.select({ ios: "down" })}
+        direction="down"
         dataSet={suggestionsList}
         onChangeText={getSuggestions}
         onSelectItem={(item) => {
           setSelectedItem(item);
           onItemSelected?.(item);
         }}
+        onBlur={onBlur}
         debounce={debounceTime}
         suggestionsListMaxHeight={Dimensions.get("window").height * 0.4}
         onClear={onClearPress}
@@ -102,9 +108,11 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
         renderItem={(item, text) => (
           <Text style={{ color: themeColors.text, padding: 15 }}>{item.title}</Text>
         )}
-        inputHeight={100}
+        inputHeight={120}
         showChevron={false}
         closeOnBlur={false}
+        ClearIconComponent={<Icon name="close-circle" />}
+        ChevronIconComponent={<Icon name="chevron-down" />}
       />
     </View>
   );
@@ -115,7 +123,6 @@ const styles = StyleSheet.create({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "red",
     ...Platform.select({ ios: { zIndex: 10 } }),
   },
   input: {

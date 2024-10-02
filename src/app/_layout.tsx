@@ -1,28 +1,31 @@
 import { ThemeProvider } from "@react-navigation/native";
 import { useFonts } from "expo-font";
-import { Link, Stack } from "expo-router";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import "react-native-reanimated";
 
-import { Header } from "@/components";
 import { useColorScheme } from "@/hooks/useColorScheme";
 import { useSession } from "@/hooks/useSession";
 import { SessionProvider } from "@/providers/SessionProvider";
 import { darkTheme, lightTheme } from "@/utils";
 import { QueryClient } from "@tanstack/query-core";
 import { QueryClientProvider } from "@tanstack/react-query";
+import { setDefaultOptions } from "date-fns";
+import { id } from "date-fns/locale";
 import { useEffect } from "react";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
-import { SafeAreaProvider } from "react-native-safe-area-context";
 
-export const unstable_settings = {
+/* export const unstable_settings = {
   initialRouteName: "index",
-};
+}; */
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 const queryClient = new QueryClient();
+setDefaultOptions({
+  locale: id,
+});
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
@@ -53,46 +56,42 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === "dark" ? darkTheme : lightTheme}>
       <QueryClientProvider client={queryClient}>
         <SessionProvider>
-          <SafeAreaProvider>
-            <AutocompleteDropdownContextProvider>
-              <Stack screenOptions={{ header: (props) => <Header {...props} /> }}>
-                <Stack.Screen
-                  name="index"
-                  options={{
-                    headerTitle: "Menu",
-                    headerBackButtonMenuEnabled: false,
-                    headerBackVisible: false,
-                  }}
-                />
+          <AutocompleteDropdownContextProvider>
+            <Stack
+              screenOptions={{
+                headerTitleStyle: {
+                  fontFamily: "Geist-SemiBold",
+                  fontSize: 20,
+                },
+              }}
+            >
+              <Stack.Screen
+                name="(tabs)"
+                options={{
+                  headerTitle: "Menu",
+                  headerBackButtonMenuEnabled: false,
+                  headerBackVisible: false,
+                  headerShown: false,
+                }}
+              />
 
-                <Stack.Screen name="auth/sign-in" options={{ headerShown: false }} />
+              <Stack.Screen name="auth/sign-in" options={{ headerShown: false }} />
 
-                <Stack.Screen
-                  name="reports/index"
-                  options={{
-                    headerTitle: "Checklist Unit",
-                    headerRight: () => {
-                      return <Link href="/reports/create">Tambah</Link>;
-                    },
-                  }}
-                />
+              <Stack.Screen
+                name="reports/create"
+                options={{
+                  headerTitle: "Tambah Checklist Unit",
+                }}
+              />
 
-                <Stack.Screen
-                  name="reports/create"
-                  options={{
-                    headerTitle: "Tambah Checklist Unit",
-                  }}
-                />
+              <Stack.Screen
+                name="reports/detail/[id]"
+                options={{ headerTitle: "Detail Unit" }}
+              />
 
-                <Stack.Screen
-                  name="reports/detail/[id]"
-                  options={{ headerTitle: "Detail Unit" }}
-                />
-
-                <Stack.Screen name="+not-found" />
-              </Stack>
-            </AutocompleteDropdownContextProvider>
-          </SafeAreaProvider>
+              <Stack.Screen name="+not-found" />
+            </Stack>
+          </AutocompleteDropdownContextProvider>
         </SessionProvider>
       </QueryClientProvider>
     </ThemeProvider>

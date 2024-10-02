@@ -9,19 +9,19 @@ import {
 } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
-import type { Unit, UnitCondition } from "@/types";
+import type { UnitCondition, UnitReport } from "@/types";
 import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery } from "@tanstack/react-query";
-import { useLocalSearchParams } from "expo-router";
-import { Fragment } from "react";
-import { Controller, useFieldArray, useForm } from "react-hook-form";
-import { View } from "react-native";
+import { useRouter } from "expo-router";
+import { Fragment, useRef } from "react";
+import { Controller, useForm } from "react-hook-form";
+import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
 import type { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { z } from "zod";
 
 const schema = z.object({
-  nik: z.coerce.string().regex(/^\d{16}$/, "NIK harus 16 digit angka"),
+  driver: z.number(),
   conditions: z.array(
     z.object({
       id: z.coerce.number(),
@@ -30,34 +30,20 @@ const schema = z.object({
       issue: z.string().nullable(),
     })
   ),
-  issues: z.string().nullable(),
+  issue: z.string().nullable(),
 });
 
 type FormValues = z.infer<typeof schema>;
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 export default function ReportDetail() {
-  const { id } = useLocalSearchParams();
-  const { session } = useSession();
-
-  const getUnit = async () => {
-    const res = await $fetch<Unit>(`http://10.10.0.58:8000/api/units/${id}`, {
-      headers: {
-        Authorization: `Bearer ${session}`,
-      },
-    });
-
-    if (res.status !== "ok") {
-      throw new Error(res.message);
-    }
-    console.log(res.data);
-
-    return res.data;
-  };
+  const { session, unit } = useSession();
+  const scrollViewRef = useRef<ScrollView>(null);
+  const router = useRouter();
 
   const getUnitConditions = async () => {
-    const res = await $fetch<UnitCondition[]>(
-      "http://10.10.0.58:8000/api/unit-conditions"
-    );
+    const res = await $fetch<UnitCondition[]>(BASE_URL + "/unit-conditions");
 
     if (res.status !== "ok") {
       throw new Error(res.message);
@@ -78,9 +64,7 @@ export default function ReportDetail() {
   };
 
   const getDrivers = async (q = "") => {
-    const res = await $fetch<AutocompleteDropdownItem[]>(
-      "http://10.10.0.58:8000/api/drivers?q=" + q
-    );
+    const res = await $fetch<AutocompleteDropdownItem[]>(BASE_URL + "/drivers?q=" + q);
 
     if (res.status !== "ok") {
       throw new Error(res.message);
@@ -89,11 +73,6 @@ export default function ReportDetail() {
     return res.data;
   };
 
-  const unitQuery = useQuery({
-    queryKey: ["report", id],
-    enabled: !!id && !!session,
-    queryFn: getUnit,
-  });
   const unitConditionsQuery = useQuery({
     queryKey: ["unitConditions"],
     queryFn: () => getUnitConditions(),
@@ -103,195 +82,207 @@ export default function ReportDetail() {
     resolver: zodResolver(schema),
     mode: "onChange",
     defaultValues: {
-      nik: "",
+      driver: undefined,
       conditions: [],
-      issues: null,
+      issue: null,
     },
   });
 
-  const conditionsForm = useFieldArray({
-    control: form.control,
-    name: "conditions",
-  });
-
-  const onSubmit = () => {
+  const onSubmit = async () => {
     const values = form.getValues();
-    console.log(values);
+
+    try {
+      const res = await $fetch<UnitReport>(BASE_URL + "/daily-monitoring-units", {
+        method: "POST",
+        body: JSON.stringify(values),
+        headers: {
+          Authorization: `Bearer ${session}`,
+        },
+      });
+
+      if (res.status === "fail") {
+        throw new Error(res.message);
+      }
+
+      router.back();
+    } catch (e: any) {
+      console.error(e.message);
+    }
   };
 
-  console.log(unitQuery.data);
-
   return (
-    <View
-      style={{
-        flex: 1,
-        flexDirection: "column",
-        rowGap: 16,
-        paddingHorizontal: 20,
-        paddingBottom: 20,
-      }}
+    <KeyboardAvoidingView
+      style={{ flex: 1, paddingVertical: 20 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={88}
     >
-      <Text variant="body1">Kode Unit</Text>
-      <TextField
-        placeholder="user@gmail.com"
-        textContentType="emailAddress"
-        autoComplete="email"
-        keyboardType="email-address"
-        autoCapitalize="none"
-        value={unitQuery.data?.asset_code ?? ""}
-        readOnly
-      />
-
-      <Controller
-        control={form.control}
-        name="nik"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View
-            style={{
-              flexDirection: "column",
-              rowGap: 4,
-            }}
-          >
-            <Text variant="body1">NIK</Text>
-            {/* <TextField
-              placeholder="user@gmail.com"
-              keyboardType="numeric"
-              autoCapitalize="none"
-              inputMode="numeric"
-              onBlur={onBlur}
-              onChangeText={(text) => {
-                onChange(text);
-              }}
-              value={value}
-            /> */}
-            <AutoComplete
-              fetchSuggestions={getDrivers}
-              placeholder="Ketik NIK..."
-              debounceTime={500}
-              onItemSelected={(item) => {
-                onChange(item?.id);
-              }}
-              inputContainerStyle={{ marginTop: 32 }}
-            />
-            {form.formState.errors.nik && (
-              <Text style={{ color: Colors.dark.destructive }}>
-                {form.formState.errors.nik.message}
-              </Text>
-            )}
+      <ScrollView
+        ref={scrollViewRef} // Attach the ScrollView to the ref
+        contentContainerStyle={{
+          flexGrow: 1,
+          paddingHorizontal: 20,
+          paddingBottom: 20,
+        }}
+        keyboardShouldPersistTaps="handled" // Allow taps to propagate through keyboard dismissal
+      >
+        
+        <View style={{ flex: 1, flexDirection: "column", rowGap: 16 }}>
+          <View>
+            <Text variant="body1">Tanggal</Text>
+            <Text variant="body1">Kode Unit</Text>
+            <TextField placeholder="DT-0001" value={unit?.asset_code} readOnly />
           </View>
-        )}
-      />
 
-      {form.getValues("conditions") &&
-        form.getValues("conditions").length > 0 &&
-        form.getValues("conditions").map((uc, i) => (
-          <Fragment key={uc.id}>
-            <Controller
-              control={form.control}
-              name={`conditions.${i}.value`}
-              render={({ field: { onChange, value } }) => (
-                <View
-                  style={{
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                    alignItems: "center",
+          <Controller
+            control={form.control}
+            name="driver"
+            render={({ field: { onChange, onBlur } }) => (
+              <View style={{ flexDirection: "column", rowGap: 4 }}>
+                <Text variant="body1">Driver</Text>
+                <AutoComplete
+                  fetchSuggestions={getDrivers}
+                  placeholder="Ketik Nama/NIK"
+                  debounceTime={500}
+                  onItemSelected={(item) => {
+                    onChange(item?.id);
+                    form.trigger("driver");
                   }}
-                >
-                  <Text variant="body1">{uc.name}</Text>
-                  <RadioGroup
-                    value={value}
-                    onValueChange={onChange}
+                  onBlur={onBlur}
+                />
+                {form.formState.errors.driver && (
+                  <Text
                     style={{
-                      flexDirection: "row",
-                      columnGap: 10,
+                      color: Colors.dark.destructive,
                     }}
                   >
-                    <View
-                      style={{ flexDirection: "row", columnGap: 4, alignItems: "center" }}
-                    >
-                      <RadioGroupItem
-                        value="C"
-                        selectedValue={value}
-                        onPress={(optValue) => {
-                          onChange(optValue);
-                          form.trigger("conditions");
-                          // form.setValue(`conditions.${i}.value`, optValue as any);
-                        }}
-                      />
-                      <Text>C</Text>
-                    </View>
-                    <View
-                      style={{ flexDirection: "row", columnGap: 4, alignItems: "center" }}
-                    >
-                      <RadioGroupItem
-                        value="K"
-                        selectedValue={value}
-                        onPress={(optValue) => {
-                          onChange(optValue);
-                          form.trigger("conditions");
-                          // form.setValue(`conditions.${i}.value`, optValue as any);
-                        }}
-                      />
-                      <Text>K</Text>
-                    </View>
-                  </RadioGroup>
-                </View>
-              )}
-            />
-
-            {form.getValues(`conditions.${i}.value`) === "K" ? (
-              <Controller
-                control={form.control}
-                name={`conditions.${i}.issue`}
-                render={({ field: { onChange, onBlur, value } }) => (
-                  <TextArea
-                    placeholder="Alasan"
-                    onChangeText={onChange}
-                    value={value || undefined}
-                    onBlur={onBlur}
-                  />
+                    {form.formState.errors.driver.message}
+                  </Text>
                 )}
-              />
-            ) : null}
-          </Fragment>
-        ))}
-
-      <Controller
-        control={form.control}
-        name="issues"
-        render={({ field: { onChange, onBlur, value } }) => (
-          <View
-            style={{
-              flexDirection: "column",
-              rowGap: 4,
-            }}
-          >
-            <Text variant="body1">Kendala (jika ada)</Text>
-            <TextArea
-              placeholder="Isikan kendala"
-              onBlur={onBlur}
-              onChangeText={(text) => {
-                onChange(text);
-              }}
-              value={value || undefined}
-            />
-            {form.formState.errors.issues && (
-              <Text style={{ color: Colors.dark.destructive }}>
-                {form.formState.errors.issues.message}
-              </Text>
+              </View>
             )}
-          </View>
-        )}
-      />
+          />
 
-      <Button
-        onPress={() => {
-          onSubmit();
-        }}
-        style={{ marginTop: 20 }}
-      >
-        Simpan
-      </Button>
-    </View>
+          {form.getValues("conditions") &&
+            form.getValues("conditions").length > 0 &&
+            form.getValues("conditions").map((uc, i) => (
+              <Fragment key={uc.id}>
+                <Controller
+                  control={form.control}
+                  name={`conditions.${i}.value`}
+                  render={({ field: { onChange, value } }) => (
+                    <View
+                      style={{
+                        flexDirection: "row",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text variant="body1">{uc.name}</Text>
+                      <RadioGroup
+                        value={value}
+                        onValueChange={onChange}
+                        style={{ flexDirection: "row", columnGap: 10 }}
+                      >
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            columnGap: 4,
+                            alignItems: "center",
+                          }}
+                        >
+                          <RadioGroupItem
+                            value="C"
+                            selectedValue={value}
+                            onPress={(optValue) => {
+                              onChange(optValue);
+                              form.trigger("conditions");
+                            }}
+                          />
+                          <Text>C</Text>
+                        </View>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            columnGap: 4,
+                            alignItems: "center",
+                          }}
+                        >
+                          <RadioGroupItem
+                            value="K"
+                            selectedValue={value}
+                            onPress={(optValue) => {
+                              onChange(optValue);
+                              form.trigger("conditions");
+                            }}
+                          />
+                          <Text>K</Text>
+                        </View>
+                      </RadioGroup>
+                    </View>
+                  )}
+                />
+
+                {form.getValues(`conditions.${i}.value`) === "K" ? (
+                  <Controller
+                    control={form.control}
+                    name={`conditions.${i}.issue`}
+                    render={({ field: { onChange, onBlur, value } }) => (
+                      <TextArea
+                        placeholder="Alasan"
+                        onChangeText={(text) => {
+                          onChange(text);
+                          // Ensure this scrolls to the TextArea when focused
+                          setTimeout(() => {
+                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                          }, 100);
+                        }}
+                        value={value || undefined}
+                        onBlur={onBlur}
+                      />
+                    )}
+                  />
+                ) : null}
+              </Fragment>
+            ))}
+
+          <Controller
+            control={form.control}
+            name="issue"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View style={{ flexDirection: "column", rowGap: 4 }}>
+                <Text variant="body1">Kendala (jika ada)</Text>
+                <TextArea
+                  placeholder="Isikan kendala"
+                  onBlur={onBlur}
+                  onChangeText={(text) => {
+                    onChange(text);
+                    // Automatically scroll when the TextArea is focused
+                    setTimeout(() => {
+                      scrollViewRef.current?.scrollToEnd({ animated: true });
+                    }, 100);
+                  }}
+                  value={value || undefined}
+                />
+                {form.formState.errors.issue && (
+                  <Text style={{ color: Colors.dark.destructive }}>
+                    {form.formState.errors.issue.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+
+          <Button
+            style={{ marginTop: 8 }}
+            onPress={() => {
+              onSubmit();
+            }}
+            disabled={!form.formState.isValid}
+          >
+            Simpan
+          </Button>
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

@@ -83,7 +83,7 @@ const baseStyles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     borderRadius: 6,
-    fontFamily: "GeistSans",
+    fontFamily: "Geist-Regular",
   },
   text: {
     fontWeight: "500",
@@ -182,8 +182,8 @@ const variantTextPressedStyles: Record<
   ButtonVariant,
   (colors: typeof Colors.light) => TextStyle
 > = {
-  default: (colors) => ({
-    color: applyAlpha(colors.text, 0.8),
+  default: () => ({
+    color: Colors.dark.text,
   }),
   destructive: (colors) => ({
     color: applyAlpha(colors.text, 0.8),

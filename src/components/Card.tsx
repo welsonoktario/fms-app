@@ -49,7 +49,9 @@ const CardTitle = ({ style, ...props }: CardTitleProps) => {
   const colorScheme = useColorScheme();
   const color = Colors[colorScheme || "light"].text;
 
-  return <Text style={[styles.cardTitle, { color }, style]} {...props} />;
+  return (
+    <Text style={[styles.cardTitle, { color, margin: 16 }, style]} {...props} />
+  );
 };
 CardTitle.displayName = "CardTitle";
 

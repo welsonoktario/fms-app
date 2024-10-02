@@ -18,6 +18,8 @@ import { Controller, useFieldArray, useForm } from "react-hook-form";
 import { View } from "react-native";
 import { z } from "zod";
 
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
+
 const schema = z.object({
   name: z.coerce.string({
     required_error: "Nama Lengkap tidak boleh kosong",
@@ -41,14 +43,11 @@ export default function ReportDetail() {
   const { session } = useSession();
 
   const getUnitReport = async () => {
-    const res = await $fetch<UnitReport>(
-      `http://10.10.0.58:8000/api/daily-monitoring-units/${id}`,
-      {
-        headers: {
-          Authorization: `Bearer ${session}`,
-        },
-      }
-    );
+    const res = await $fetch<UnitReport>(BASE_URL + `/daily-monitoring-units/${id}`, {
+      headers: {
+        Authorization: `Bearer ${session}`,
+      },
+    });
 
     if (res.status !== "ok") {
       throw new Error(res.message);
@@ -58,9 +57,7 @@ export default function ReportDetail() {
   };
 
   const getUnitConditions = async () => {
-    const res = await $fetch<UnitCondition[]>(
-      "http://10.10.0.58:8000/api/unit-conditions"
-    );
+    const res = await $fetch<UnitCondition[]>(BASE_URL + "/unit-conditions");
 
     if (res.status !== "ok") {
       throw new Error(res.message);

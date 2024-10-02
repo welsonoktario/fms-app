@@ -65,4 +65,18 @@ export type UnitReport = {
   conditions: UnitReportCondition[];
   issue: string | null;
   status_unit: "READY" | "NOT READY";
+  created_at?: string;
+};
+
+export type Driver = {
+  id: number;
+  nik: string;
+  name: string;
+  phone_number: string;
+  provider: string;
+  status: string;
+};
+
+export type UnitReportDriver = UnitReport & {
+  driver: Driver;
 };
