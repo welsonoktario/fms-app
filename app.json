@@ -12,6 +12,7 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
+    "platforms": ["android", "ios"],
     "ios": {
       "supportsTablet": true
     },
@@ -21,11 +22,6 @@
         "backgroundColor": "#ffffff"
       },
       "package": "com.technivine.fms"
-    },
-    "web": {
-      "bundler": "metro",
-      "output": "static",
-      "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
       "expo-router",
@@ -64,6 +60,15 @@
         "projectId": "9d0a82e3-4b87-4fcc-aacd-58d6fca6b9ed"
       }
     },
-    "owner": "technivine"
+    "owner": "technivine",
+    "updates": {
+      "url": "https://u.expo.dev/9d0a82e3-4b87-4fcc-aacd-58d6fca6b9ed",
+      "requestHeaders": {
+        "expo-channel-name": "preview"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    }
   }
 }
