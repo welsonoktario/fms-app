@@ -12,7 +12,7 @@ import { useSession } from "@/hooks";
 import type { UnitCondition, UnitReport } from "@/types";
 import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { Fragment, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -36,11 +36,11 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
-
 export default function ReportDetail() {
   const { session, unit } = useSession();
   const scrollViewRef = useRef<ScrollView>(null);
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const getUnitConditions = async () => {
     const res = await $fetch<UnitCondition[]>(BASE_URL + "/unit-conditions");
@@ -104,6 +104,10 @@ export default function ReportDetail() {
         throw new Error(res.message);
       }
 
+      queryClient.refetchQueries({
+        exact: true,
+        queryKey: ["today-reports"],
+      });
       router.back();
     } catch (e: any) {
       console.error(e.message);
@@ -125,7 +129,6 @@ export default function ReportDetail() {
         }}
         keyboardShouldPersistTaps="handled" // Allow taps to propagate through keyboard dismissal
       >
-        
         <View style={{ flex: 1, flexDirection: "column", rowGap: 16 }}>
           <View>
             <Text variant="body1">Tanggal</Text>

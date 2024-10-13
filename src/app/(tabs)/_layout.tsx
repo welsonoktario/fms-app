@@ -1,4 +1,4 @@
-import { Button, Icon } from "@/components";
+import { Icon } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
 import { applyAlpha } from "@/utils";
@@ -35,22 +35,12 @@ export default function ReportsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: "Unit",
-          tabBarIcon: ({ color }) => <Icon size={28} name="truck" color={color} />,
+          title: "Home",
+          tabBarIcon: ({ color }) => <Icon size={28} name="home" color={color} />,
           tabBarLabelStyle: {
             fontFamily: "Geist-Medium",
             fontSize: 12,
           },
-          headerRight: () => (
-            <Button
-              size="icon"
-              onPress={() => {
-                router.navigate("/reports/create");
-              }}
-            >
-              <Icon name="plus" color={Colors[colorScheme || "light"].background} />
-            </Button>
-          ),
         }}
       />
       <Tabs.Screen
@@ -60,6 +50,7 @@ export default function ReportsLayout() {
           tabBarIcon: ({ color }) => <Icon size={28} name="history" color={color} />,
           tabBarLabelStyle: {
             fontFamily: "Geist-Medium",
+            fontSize: 12,
           },
         }}
       />

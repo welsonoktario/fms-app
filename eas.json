@@ -9,6 +9,9 @@
       "distribution": "internal"
     },
     "preview": {
+      "android": {
+        "buildType": "apk"
+      },
       "distribution": "internal",
       "channel": "0513a567-106b-4f12-a7d0-98d8f30e9aa0"
     },

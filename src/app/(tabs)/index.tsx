@@ -1,4 +1,5 @@
-import { Card, CardContent, CardTitle, ListItem, Text } from "@/components";
+import { Button, Card, CardContent, CardTitle, ListItem, Text } from "@/components";
+import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks/useSession";
 import type { UnitReportDriver } from "@/types";
 import { $fetch } from "@/utils";
@@ -9,7 +10,8 @@ import {
   getCurrentPositionAsync,
   requestForegroundPermissionsAsync,
 } from "expo-location";
-import React, { useEffect, useState } from "react";
+import { useRouter } from "expo-router";
+import React, { useEffect, useRef, useState } from "react";
 import { RefreshControl, ScrollView, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 
@@ -32,6 +34,8 @@ const getTodayHistory = async (session: string): Promise<UnitReportDriver[]> => 
 
 export default function Reports() {
   const { session, unit } = useSession();
+  const router = useRouter();
+  const mapRef = useRef<MapView | null>(null);
 
   const [location, setLocation] = useState<LocationObject | null>(null);
 
@@ -47,8 +51,15 @@ export default function Reports() {
         return;
       }
 
-      let location = await getCurrentPositionAsync({});
-      setLocation(location);
+      let currentLocation = await getCurrentPositionAsync({});
+      setLocation(currentLocation);
+      mapRef.current?.setCamera({
+        center: {
+          latitude: currentLocation.coords.latitude,
+          longitude: currentLocation.coords.longitude,
+        },
+        zoom: 16,
+      });
     })();
   }, []);
 
@@ -66,29 +77,55 @@ export default function Reports() {
 
       <View style={{ marginTop: 16, height: 250, borderRadius: 8, overflow: "hidden" }}>
         <MapView
+          ref={(map) => (mapRef.current = map)}
           loadingEnabled={!location}
           provider={PROVIDER_GOOGLE}
           style={{ width: "100%", height: "100%" }}
+          loadingIndicatorColor={Colors["light"].primary}
           showsUserLocation
           followsUserLocation
         />
       </View>
 
-      {!isPending && data ? (
-        <Card style={{ marginTop: 16 }}>
-          <CardTitle>Checklist Hari Ini</CardTitle>
-          <CardContent>
-            {data.length === 0 ? (
-              <Text style={{ marginTop: 16, textAlign: "center" }}>Belum ada data</Text>
-            ) : (
-              data.map((history) => (
-                <ListItem
-                  key={history.id}
-                  onPress={() => {}}
-                  title={formatDate(history.created_at!, "dd-MM-y")}
-                />
-              ))
-            )}
+      {!isPending && data !== undefined ? (
+        <Card
+          style={{
+            marginTop: 32,
+            backgroundColor: "transparent",
+            elevation: 0,
+            borderColor: "transparent",
+          }}
+        >
+          <CardTitle style={{ margin: 0 }}>Checklist Hari Ini</CardTitle>
+          <CardContent style={{ marginTop: 8, paddingHorizontal: 0 }}>
+            <Button
+              style={{ marginBottom: 12 }}
+              onPress={() => {
+                router.navigate("/reports/create");
+              }}
+            >
+              Tambah Checklist
+            </Button>
+            <View style={{ rowGap: 8 }}>
+              {data.length === 0 ? (
+                <Text style={{ textAlign: "center" }}>Belum ada data</Text>
+              ) : (
+                data.map((history) => (
+                  <ListItem
+                    key={history.id}
+                    onPress={() => {
+                      router.navigate(`/reports/detail/${history.id}`);
+                    }}
+                    icon={
+                      history.status_unit === "READY" ? "check-circle" : "close-circle"
+                    }
+                    iconColor={history.status_unit === "READY" ? "green" : "red"}
+                    title={`${history.driver.name} - ${formatDate(history.created_at!, "HH:mm:ss")}`}
+                    detail
+                  />
+                ))
+              )}
+            </View>
           </CardContent>
         </Card>
       ) : null}

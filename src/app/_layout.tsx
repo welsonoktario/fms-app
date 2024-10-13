@@ -86,7 +86,7 @@ export default function RootLayout() {
 
               <Stack.Screen
                 name="reports/detail/[id]"
-                options={{ headerTitle: "Detail Unit" }}
+                options={{ headerTitle: "Detail Checklist" }}
               />
 
               <Stack.Screen name="+not-found" />

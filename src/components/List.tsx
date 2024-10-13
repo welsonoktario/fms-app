@@ -9,7 +9,8 @@ import { Pressable, StyleSheet, View, useColorScheme } from "react-native";
 interface ListItemProps {
   title: string;
   description?: string;
-  icon?: string; // Optional icon path for an image
+  icon?: string;
+  iconColor?: string;
   detail?: boolean;
   onPress: () => void;
 }
@@ -18,6 +19,7 @@ const ListItem: React.FC<ListItemProps> = ({
   title,
   description,
   icon,
+  iconColor,
   detail,
   onPress,
 }) => {
@@ -35,7 +37,14 @@ const ListItem: React.FC<ListItemProps> = ({
       onPress={onPress}
     >
       <View style={{ marginRight: icon ? 16 : 0 }}>
-        {icon ? <Icon name={icon} style={styles.icon} size={28} /> : null}
+        {icon ? (
+          <Icon
+            name={icon}
+            color={icon && iconColor ? iconColor : undefined}
+            style={styles.icon}
+            size={28}
+          />
+        ) : null}
       </View>
       <View style={styles.textContainer}>
         <Text variant="body1">{title}</Text>
@@ -63,9 +72,11 @@ const styles = StyleSheet.create({
     textAlign: "center",
     width: 28,
     height: 28,
+    backgroundColor: "transparent",
   },
   textContainer: {
     flex: 1,
+    backgroundColor: "transparent",
   },
 });
 

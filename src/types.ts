@@ -73,6 +73,8 @@ export type UnitReport = {
   issue: string | null;
   status_unit: "READY" | "NOT READY";
   created_at?: string;
+  unit?: Unit | null,
+  driver?: Driver | null
 };
 
 export type Driver = {
