@@ -25,6 +25,12 @@ export type UnitCondition = {
   name: string;
 };
 
+export type Project = {
+  id: number;
+  name: string;
+  timezone: "WIB" | "WITA" | "WIT";
+};
+
 export type Unit = {
   id: number;
   asset_code: string;
@@ -49,6 +55,7 @@ export type Unit = {
   image_barcode?: string | null;
   created_at: string; // ISO date format
   updated_at: string; // ISO date format
+  project?: Project | null;
 };
 
 export type UnitReportCondition = {
