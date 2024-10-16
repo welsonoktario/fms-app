@@ -32,6 +32,7 @@ export default function ReportDetail() {
     enabled: !!id && !!session,
     queryFn: () => getUnitReport(session!, id.toString()),
   });
+
   return (
     <ScrollView
       refreshControl={<RefreshControl refreshing={isPending} onRefresh={refetch} />}
@@ -60,7 +61,7 @@ export default function ReportDetail() {
           </View>
           <View>
             <Text variant="h5">Kondisi Unit</Text>
-            {data?.conditions.map((condition) => (
+            {(data.conditions || []).map((condition) => (
               <>
                 <Text key={`condition-${condition.id}`}>
                   {condition.name} - {condition.value}

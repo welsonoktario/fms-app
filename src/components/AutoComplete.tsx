@@ -82,7 +82,6 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
           placeholder,
           autoCorrect: false,
           autoCapitalize: "none",
-          keyboardType: "number-pad",
           style: [
             styles.input,
             {

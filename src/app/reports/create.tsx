@@ -1,6 +1,7 @@
 import {
   AutoComplete,
   Button,
+  Icon,
   RadioGroup,
   RadioGroupItem,
   Text,
@@ -9,19 +10,31 @@ import {
 } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
+import { useCameraStore } from "@/stores/camera-store";
 import type { UnitCondition, UnitReport } from "@/types";
 import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDate } from "date-fns";
 import { useRouter } from "expo-router";
 import { Fragment, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  Pressable,
+  ScrollView,
+  View,
+} from "react-native";
 import type { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { z } from "zod";
 
 const schema = z.object({
-  driver: z.number(),
+  driver: z.number({
+    required_error: "Isi driver",
+  }),
   conditions: z.array(
     z.object({
       id: z.coerce.number(),
@@ -41,6 +54,7 @@ export default function ReportDetail() {
   const scrollViewRef = useRef<ScrollView>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { takenPicture } = useCameraStore();
 
   const getUnitConditions = async () => {
     const res = await $fetch<UnitCondition[]>(BASE_URL + "/unit-conditions");
@@ -116,7 +130,7 @@ export default function ReportDetail() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, paddingVertical: 20 }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={88}
     >
@@ -124,6 +138,7 @@ export default function ReportDetail() {
         ref={scrollViewRef} // Attach the ScrollView to the ref
         contentContainerStyle={{
           flexGrow: 1,
+          paddingVertical: 20,
           paddingHorizontal: 20,
           paddingBottom: 20,
         }}
@@ -131,9 +146,20 @@ export default function ReportDetail() {
       >
         <View style={{ flex: 1, flexDirection: "column", rowGap: 16 }}>
           <View>
-            <Text variant="body1">Tanggal</Text>
+            <Text variant="body1">Tanggal Checklist</Text>
+            <Text style={{ marginTop: 4 }} variant="body2">
+              {formatDate(new Date(), "dd-MM-yyyy")}
+            </Text>
+          </View>
+
+          <View>
             <Text variant="body1">Kode Unit</Text>
-            <TextField placeholder="DT-0001" value={unit?.asset_code} readOnly />
+            <TextField
+              style={{ marginTop: 4 }}
+              placeholder="DT-0001"
+              value={unit?.asset_code}
+              readOnly
+            />
           </View>
 
           <Controller
@@ -165,8 +191,7 @@ export default function ReportDetail() {
             )}
           />
 
-          {form.getValues("conditions") &&
-            form.getValues("conditions").length > 0 &&
+          {form.getValues("conditions") && form.getValues("conditions").length > 0 ? (
             form.getValues("conditions").map((uc, i) => (
               <Fragment key={uc.id}>
                 <Controller
@@ -246,7 +271,10 @@ export default function ReportDetail() {
                   />
                 ) : null}
               </Fragment>
-            ))}
+            ))
+          ) : (
+            <ActivityIndicator style={{ marginTop: 8 }} />
+          )}
 
           <Controller
             control={form.control}
@@ -255,6 +283,7 @@ export default function ReportDetail() {
               <View style={{ flexDirection: "column", rowGap: 4 }}>
                 <Text variant="body1">Kendala (jika ada)</Text>
                 <TextArea
+                  style={{ marginTop: 4 }}
                   placeholder="Isikan kendala"
                   onBlur={onBlur}
                   onChangeText={(text) => {
@@ -274,6 +303,55 @@ export default function ReportDetail() {
               </View>
             )}
           />
+
+          <View>
+            <Text>Foto Unit</Text>
+            <Pressable
+              style={{ marginTop: 4 }}
+              onPress={() => {
+                router.navigate("/camera");
+              }}
+            >
+              {takenPicture ? (
+                <View style={{ overflow: "hidden", borderRadius: 8 }}>
+                  <Image
+                    source={{
+                      uri: takenPicture.uri,
+                    }}
+                    resizeMode="cover"
+                    style={{
+                      width: "100%",
+                      aspectRatio: "9/16",
+                    }}
+                  />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    borderStyle: "dashed",
+                    borderWidth: 1,
+                    borderColor: "#A9A9A9",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginVertical: 52,
+                    }}
+                  >
+                    <Icon name="image" size={44} color="#A9A9A9" />
+                    <Text style={{ marginTop: 16, color: "#A9A9A9" }}>
+                      Ambil foto dari kamera
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          </View>
 
           <Button
             style={{ marginTop: 8 }}
