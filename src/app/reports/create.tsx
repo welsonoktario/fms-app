@@ -13,15 +13,24 @@ import type { UnitCondition, UnitReport } from "@/types";
 import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { formatDate } from "date-fns";
 import { useRouter } from "expo-router";
 import { Fragment, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { KeyboardAvoidingView, Platform, ScrollView, View } from "react-native";
+import {
+  ActivityIndicator,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  View,
+} from "react-native";
 import type { AutocompleteDropdownItem } from "react-native-autocomplete-dropdown";
 import { z } from "zod";
 
 const schema = z.object({
-  driver: z.number(),
+  driver: z.number({
+    required_error: "Isi driver",
+  }),
   conditions: z.array(
     z.object({
       id: z.coerce.number(),
@@ -116,7 +125,7 @@ export default function ReportDetail() {
 
   return (
     <KeyboardAvoidingView
-      style={{ flex: 1, paddingVertical: 20 }}
+      style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={88}
     >
@@ -124,16 +133,27 @@ export default function ReportDetail() {
         ref={scrollViewRef} // Attach the ScrollView to the ref
         contentContainerStyle={{
           flexGrow: 1,
-          paddingHorizontal: 20,
-          paddingBottom: 20,
+          padding: 20,
         }}
         keyboardShouldPersistTaps="handled" // Allow taps to propagate through keyboard dismissal
       >
         <View style={{ flex: 1, flexDirection: "column", rowGap: 16 }}>
           <View>
-            <Text variant="body1">Tanggal</Text>
+            <Text variant="body1">Tanggal Checklist</Text>
+            <Text style={{ marginTop: 4 }} variant="body2">
+              {formatDate(new Date(), "dd-MM-yyyy")}
+            </Text>
+          </View>
+
+          <View>
             <Text variant="body1">Kode Unit</Text>
             <TextField placeholder="DT-0001" value={unit?.asset_code} readOnly />
+            <TextField
+              style={{ marginTop: 4 }}
+              placeholder="DT-0001"
+              value={unit?.asset_code}
+              readOnly
+            />
           </View>
 
           <Controller
@@ -165,8 +185,7 @@ export default function ReportDetail() {
             )}
           />
 
-          {form.getValues("conditions") &&
-            form.getValues("conditions").length > 0 &&
+          {form.getValues("conditions") && form.getValues("conditions").length > 0 ? (
             form.getValues("conditions").map((uc, i) => (
               <Fragment key={uc.id}>
                 <Controller
@@ -246,7 +265,10 @@ export default function ReportDetail() {
                   />
                 ) : null}
               </Fragment>
-            ))}
+            ))
+          ) : (
+            <ActivityIndicator style={{ marginTop: 8 }} />
+          )}
 
           <Controller
             control={form.control}
@@ -255,6 +277,7 @@ export default function ReportDetail() {
               <View style={{ flexDirection: "column", rowGap: 4 }}>
                 <Text variant="body1">Kendala (jika ada)</Text>
                 <TextArea
+                  style={{ marginTop: 4 }}
                   placeholder="Isikan kendala"
                   onBlur={onBlur}
                   onChangeText={(text) => {

@@ -59,16 +59,17 @@ export default function RootLayout() {
           <AutocompleteDropdownContextProvider>
             <Stack
               screenOptions={{
+                headerBackTitleVisible: false,
                 headerTitleStyle: {
                   fontFamily: "Geist-SemiBold",
-                  fontSize: 20,
+                  fontSize: 18,
                 },
               }}
             >
               <Stack.Screen
                 name="(tabs)"
                 options={{
-                  headerTitle: "Menu",
+                  headerTitle: "Home",
                   headerBackButtonMenuEnabled: false,
                   headerBackVisible: false,
                   headerShown: false,

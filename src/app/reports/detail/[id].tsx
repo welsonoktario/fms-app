@@ -60,7 +60,7 @@ export default function ReportDetail() {
           </View>
           <View>
             <Text variant="h5">Kondisi Unit</Text>
-            {data?.conditions.map((condition) => (
+            {(data.conditions || []).map((condition) => (
               <>
                 <Text key={`condition-${condition.id}`}>
                   {condition.name} - {condition.value}
