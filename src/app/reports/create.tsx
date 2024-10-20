@@ -147,7 +147,6 @@ export default function ReportDetail() {
 
           <View>
             <Text variant="body1">Kode Unit</Text>
-            <TextField placeholder="DT-0001" value={unit?.asset_code} readOnly />
             <TextField
               style={{ marginTop: 4 }}
               placeholder="DT-0001"

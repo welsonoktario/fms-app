@@ -12,7 +12,8 @@ import { QueryClient } from "@tanstack/query-core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
-import { useEffect } from "react";
+import * as Updates from "expo-updates";
+import { useEffect, useState } from "react";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 
 /* export const unstable_settings = {
@@ -41,14 +42,38 @@ export default function RootLayout() {
     "Geist-UltraBlack": require("../assets/fonts/Geist-UltraBlack.ttf"),
   });
   const { isLoading } = useSession();
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && fontLoaded) {
+    async function checkAndApplyUpdates() {
+      try {
+        // Check if an update is available
+        const update = await Updates.checkForUpdateAsync();
+        console.log(update);
+
+        if (update.isAvailable) {
+          setUpdateAvailable(true);
+          // Download the update
+          await Updates.fetchUpdateAsync();
+          // Apply the update (you can choose to reload the app right after)
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        console.error("Error checking or applying updates", error);
+      }
+    }
+
+    checkAndApplyUpdates();
+  }, []);
+
+  useEffect(() => {
+    if (!isLoading && fontLoaded && !updateAvailable) {
       SplashScreen.hideAsync();
     }
-  }, [fontLoaded, isLoading]);
+  }, [fontLoaded, isLoading, updateAvailable]);
 
-  if (!fontLoaded || isLoading) {
+  if (!fontLoaded || isLoading || updateAvailable) {
+    // While font or session is loading, or if an update is in progress, keep the screen blank
     return null;
   }
 
