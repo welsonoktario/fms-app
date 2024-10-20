@@ -17,9 +17,5 @@
     },
     "[json]": {
       "editor.defaultFormatter": "biomejs.biome"
-    },
-    "exportall.config.folderListener": [
-      "/src/hooks",
-      "/src/components"
-    ]
+    }
   }

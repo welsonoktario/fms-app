@@ -14,11 +14,13 @@ import { $fetch } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
+import { getCurrentPositionAsync } from "expo-location";
 import { useRouter } from "expo-router";
 import { Fragment, useRef } from "react";
 import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
+  Alert,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -40,6 +42,12 @@ const schema = z.object({
     })
   ),
   issue: z.string().nullable(),
+  location: z
+    .object({
+      lat: z.number(),
+      lng: z.number(),
+    })
+    .optional(),
 });
 
 type FormValues = z.infer<typeof schema>;
@@ -98,6 +106,11 @@ export default function ReportDetail() {
   });
 
   const onSubmit = async () => {
+    const location = await getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+    form.setValue("location.lat", latitude);
+    form.setValue("location.lng", longitude);
+
     const values = form.getValues();
 
     try {
@@ -119,7 +132,11 @@ export default function ReportDetail() {
       });
       router.back();
     } catch (e: any) {
-      console.error(e.message);
+      Alert.alert("Error", e.message, [
+        {
+          text: "OK",
+        },
+      ]);
     }
   };
 

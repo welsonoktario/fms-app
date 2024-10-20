@@ -3,6 +3,7 @@ import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks/useSession";
 import type { UnitReportDriver } from "@/types";
 import { $fetch } from "@/utils";
+import { calculateDistance } from "@/utils/spatial";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import {
@@ -12,7 +13,7 @@ import {
 } from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { Alert, RefreshControl, ScrollView, View } from "react-native";
 import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
@@ -32,8 +33,8 @@ const getTodayHistory = async (session: string): Promise<UnitReportDriver[]> => 
   return res.data;
 };
 
-export default function Reports() {
-  const { session, unit } = useSession();
+export default function Home() {
+  const { session, unit, signOut } = useSession();
   const router = useRouter();
   const mapRef = useRef<MapView | null>(null);
 
@@ -62,6 +63,32 @@ export default function Reports() {
       });
     })();
   }, []);
+
+  const handleAddChecklist = async () => {
+    const location = await getCurrentPositionAsync({});
+    const { latitude, longitude } = location.coords;
+
+    if (unit?.project?.location && unit.project.radius) {
+      // Calculate distance
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        unit.project.location.coordinates[1],
+        unit.project.location.coordinates[0]
+      );
+
+      // Check if distance is within the radius
+      if (distance <= unit.project.radius) {
+        router.navigate("/reports/create");
+      } else {
+        Alert.alert("Error", "Anda berada diluar jangkauan proyek", [
+          {
+            text: "OK",
+          },
+        ]);
+      }
+    }
+  };
 
   return (
     <ScrollView
@@ -101,7 +128,7 @@ export default function Reports() {
             <Button
               style={{ marginBottom: 12 }}
               onPress={() => {
-                router.navigate("/reports/create");
+                handleAddChecklist();
               }}
             >
               Tambah Checklist

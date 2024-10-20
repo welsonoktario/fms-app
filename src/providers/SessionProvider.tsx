@@ -2,6 +2,7 @@ import { useStorageState } from "@/hooks/useStorageState";
 import type { Unit } from "@/types";
 import { router } from "expo-router";
 import { type PropsWithChildren, createContext } from "react";
+import { Alert } from "react-native";
 
 export const AuthContext = createContext<{
   signIn: (email: string, password: string) => void;
@@ -42,7 +43,11 @@ export function SessionProvider({ children }: PropsWithChildren) {
         throw new Error("Login failed");
       }
 
-      const { status, data } = await response.json();
+      const { status, data, message } = await response.json();
+
+      if (status === "fail") {
+        throw new Error(message);
+      }
 
       const token = data.token;
 
@@ -55,8 +60,9 @@ export function SessionProvider({ children }: PropsWithChildren) {
         router.dismissAll();
       }
       router.replace("/");
-    } catch (error) {
-      console.error("Login error:", error);
+    } catch (e: any) {
+      console.error("Login error:", e);
+      Alert.alert("Login Gagal", e.message);
       setSession(null);
     }
   };

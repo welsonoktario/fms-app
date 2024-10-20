@@ -49,7 +49,6 @@ export default function RootLayout() {
       try {
         // Check if an update is available
         const update = await Updates.checkForUpdateAsync();
-        console.log(update);
 
         if (update.isAvailable) {
           setUpdateAvailable(true);
