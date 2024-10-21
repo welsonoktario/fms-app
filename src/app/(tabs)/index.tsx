@@ -2,7 +2,7 @@ import { Button, Card, CardContent, CardTitle, ListItem, Text } from "@/componen
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks/useSession";
 import type { UnitReportDriver } from "@/types";
-import { $fetch } from "@/utils";
+import { $fetch, applyAlpha } from "@/utils";
 import { calculateDistance } from "@/utils/spatial";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -13,8 +13,8 @@ import {
 } from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, RefreshControl, ScrollView, View } from "react-native";
-import MapView, { PROVIDER_GOOGLE } from "react-native-maps";
+import { ActivityIndicator, Alert, RefreshControl, ScrollView, View } from "react-native";
+import MapView, { Circle, Marker, PROVIDER_GOOGLE } from "react-native-maps";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -54,7 +54,7 @@ export default function Home() {
 
       let currentLocation = await getCurrentPositionAsync({});
       setLocation(currentLocation);
-      mapRef.current?.setCamera({
+      mapRef.current?.animateCamera({
         center: {
           latitude: currentLocation.coords.latitude,
           longitude: currentLocation.coords.longitude,
@@ -102,17 +102,47 @@ export default function Home() {
         Unit {unit?.asset_code} {unit?.project ? `(${unit?.project?.name})` : null}
       </Text>
 
-      <View style={{ marginTop: 16, height: 250, borderRadius: 8, overflow: "hidden" }}>
-        <MapView
-          ref={(map) => (mapRef.current = map)}
-          loadingEnabled={!location}
-          provider={PROVIDER_GOOGLE}
-          style={{ width: "100%", height: "100%" }}
-          loadingIndicatorColor={Colors["light"].primary}
-          showsUserLocation
-          followsUserLocation
-        />
-      </View>
+      {unit?.project?.location?.coordinates && unit.project.radius ? (
+        <View style={{ marginTop: 16, height: 250, borderRadius: 8, overflow: "hidden" }}>
+          <MapView
+            ref={(map) => (mapRef.current = map)}
+            loadingEnabled={!location}
+            provider={PROVIDER_GOOGLE}
+            style={{ width: "100%", height: "100%" }}
+            loadingIndicatorColor={Colors["light"].primary}
+            showsUserLocation
+            followsUserLocation
+          >
+            <Marker
+              coordinate={{
+                latitude: unit.project.location.coordinates[1],
+                longitude: unit.project.location.coordinates[0],
+              }}
+            />
+            <Circle
+              center={{
+                latitude: unit.project.location.coordinates[1],
+                longitude: unit.project.location.coordinates[0],
+              }}
+              radius={Number(unit.project.radius)}
+              fillColor={applyAlpha(Colors["light"].primary, 0.4, "rgba")}
+            />
+          </MapView>
+        </View>
+      ) : (
+        <View
+          style={{
+            marginTop: 16,
+            height: 250,
+            borderRadius: 8,
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator />
+        </View>
+      )}
 
       {!isPending && data !== undefined ? (
         <Card

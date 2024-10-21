@@ -62,7 +62,9 @@ export default function RootLayout() {
       }
     }
 
-    checkAndApplyUpdates();
+    if (!__DEV__) {
+      checkAndApplyUpdates();
+    }
   }, []);
 
   useEffect(() => {
