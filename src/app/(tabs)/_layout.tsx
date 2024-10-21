@@ -18,7 +18,10 @@ export default function ReportsLayout() {
     <Tabs
       screenOptions={{
         tabBarActiveTintColor: Colors[colorScheme || "light"].primary,
-        headerPressColor: applyAlpha(Colors[colorScheme || "light"].primary, 0.7),
+        headerPressColor: applyAlpha(
+          Colors[colorScheme || "light"].primary,
+          0.7,
+        ),
         headerTitleAlign: "left",
         headerTitleStyle: {
           fontFamily: "Geist-SemiBold",
@@ -36,7 +39,9 @@ export default function ReportsLayout() {
         name="index"
         options={{
           title: "Home",
-          tabBarIcon: ({ color }) => <Icon size={28} name="home" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Icon size={28} name="home" color={color} />
+          ),
           tabBarLabelStyle: {
             fontFamily: "Geist-Medium",
             fontSize: 12,
@@ -47,7 +52,9 @@ export default function ReportsLayout() {
         name="history"
         options={{
           title: "Riwayat",
-          tabBarIcon: ({ color }) => <Icon size={28} name="history" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Icon size={28} name="history" color={color} />
+          ),
           tabBarLabelStyle: {
             fontFamily: "Geist-Medium",
             fontSize: 12,
@@ -58,7 +65,9 @@ export default function ReportsLayout() {
         name="profile"
         options={{
           title: "Profil",
-          tabBarIcon: ({ color }) => <Icon size={28} name="account" color={color} />,
+          tabBarIcon: ({ color }) => (
+            <Icon size={28} name="account" color={color} />
+          ),
           tabBarLabelStyle: {
             fontFamily: "Geist-Medium",
             fontSize: 12,

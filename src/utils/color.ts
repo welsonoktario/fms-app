@@ -1,7 +1,7 @@
 export const applyAlpha = (
   color: string,
   alpha: number,
-  format: "hsla" | "rgba" = "hsla"
+  format: "hsla" | "rgba" = "hsla",
 ): string => {
   // Extract the HSL part of the color
   const hslMatch = color.match(/hsl\((\d+),\s*(\d+)%,\s*(\d+)%\)/);
@@ -20,9 +20,9 @@ export const applyAlpha = (
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1));
   const m = l / 100 - c / 2;
 
-  let r;
-  let g;
-  let b;
+  let r: number;
+  let g: number;
+  let b: number;
 
   if (h < 60) [r, g, b] = [c, x, 0];
   else if (h < 120) [r, g, b] = [x, c, 0];

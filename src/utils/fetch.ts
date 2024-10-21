@@ -12,7 +12,7 @@ export class FetchError extends Error {
 // Type-safe fetch wrapper utility
 export async function $fetch<TData>(
   url: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
 ): Promise<ApiResponse<TData>> {
   // Set default headers if not provided
   const defaultHeaders = {

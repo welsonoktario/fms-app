@@ -1,5 +1,5 @@
+import { Icon } from "@/components/Icon";
 import { Colors } from "@/constants/Colors";
-import { MaterialIcons } from "@expo/vector-icons"; // For check icon
 import type React from "react";
 import {
   type StyleProp,
@@ -63,7 +63,9 @@ const RadioGroupItem: React.FC<RadioGroupItemProps> = ({
       onPress={() => onPress(value)}
       disabled={disabled}
     >
-      {isSelected && <MaterialIcons name="check" size={18} color={themeColors.primary} />}
+      {isSelected && (
+        <Icon name="check" size={18} color={themeColors.primary} />
+      )}
     </TouchableOpacity>
   );
 };

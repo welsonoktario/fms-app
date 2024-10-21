@@ -27,7 +27,7 @@ export function SessionProvider({ children }: PropsWithChildren) {
   const signIn = async (email: string, password: string) => {
     try {
       // Use fetch to send a POST request to the Laravel backend for sign-in
-      const response = await fetch(BASE_URL + "/auth/login", {
+      const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
         headers: {
           Accept: "application/json",

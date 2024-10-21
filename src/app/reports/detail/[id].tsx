@@ -10,11 +10,14 @@ import { RefreshControl, ScrollView, View } from "react-native";
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
 const getUnitReport = async (session: string, id: string) => {
-  const res = await $fetch<UnitReport>(BASE_URL + `/daily-monitoring-units/${id}`, {
-    headers: {
-      Authorization: `Bearer ${session}`,
+  const res = await $fetch<UnitReport>(
+    `${BASE_URL}/daily-monitoring-units/${id}`,
+    {
+      headers: {
+        Authorization: `Bearer ${session}`,
+      },
     },
-  });
+  );
 
   if (res.status !== "ok") {
     throw new Error(res.message);
@@ -34,7 +37,9 @@ export default function ReportDetail() {
   });
   return (
     <ScrollView
-      refreshControl={<RefreshControl refreshing={isPending} onRefresh={refetch} />}
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refetch} />
+      }
       contentContainerStyle={{
         flex: 1,
         flexDirection: "column",
@@ -50,7 +55,9 @@ export default function ReportDetail() {
           </View>
           <View>
             <Text variant="h5">Status Unit</Text>
-            <Text style={{ color: data?.status_unit === "READY" ? "green" : "red" }}>
+            <Text
+              style={{ color: data?.status_unit === "READY" ? "green" : "red" }}
+            >
               {data?.status_unit}
             </Text>
           </View>
@@ -67,7 +74,7 @@ export default function ReportDetail() {
                 </Text>
                 {condition.value === "K" ? (
                   <Text
-                    key={`condition-${condition.id}-issue`}
+                    key={`report-${id}-condition-${condition.id}-issue`}
                     variant="body2"
                     style={{ marginBottom: 4 }}
                   >

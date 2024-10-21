@@ -34,8 +34,8 @@ const HistoryCard: React.FC<{ history: UnitReportDriver }> = ({ history }) => (
           style={{
             color:
               history.status_unit === "READY"
-                ? Colors["light"].primary
-                : Colors["light"].destructive,
+                ? Colors.light.primary
+                : Colors.light.destructive,
           }}
         >
           {history.status_unit}
@@ -61,7 +61,9 @@ export default function History() {
         rowGap: 8,
         padding: 20,
       }}
-      refreshControl={<RefreshControl refreshing={isPending} onRefresh={refetch} />}
+      refreshControl={
+        <RefreshControl refreshing={isPending} onRefresh={refetch} />
+      }
     >
       {data &&
         Object.entries(data).map(([date, histories]) => (

@@ -39,8 +39,11 @@ const schema = z.object({
       name: z.coerce.string(),
       value: z.union([z.literal("C"), z.literal("K")]),
       issue: z.string().nullable(),
-    })
+    }),
   ),
+  status: z
+    .union([z.literal("READY"), z.literal("NOT READY")])
+    .default("READY"),
   issue: z.string().nullable(),
   location: z
     .object({
@@ -60,7 +63,7 @@ export default function ReportDetail() {
   const queryClient = useQueryClient();
 
   const getUnitConditions = async () => {
-    const res = await $fetch<UnitCondition[]>(BASE_URL + "/unit-conditions");
+    const res = await $fetch<UnitCondition[]>(`${BASE_URL}/unit-conditions`);
 
     if (res.status !== "ok") {
       throw new Error(res.message);
@@ -73,7 +76,7 @@ export default function ReportDetail() {
         name: c.name,
         value: "C",
         issue: null,
-      }))
+      })),
     );
     form.trigger("conditions");
 
@@ -81,7 +84,9 @@ export default function ReportDetail() {
   };
 
   const getDrivers = async (q = "") => {
-    const res = await $fetch<AutocompleteDropdownItem[]>(BASE_URL + "/drivers?q=" + q);
+    const res = await $fetch<AutocompleteDropdownItem[]>(
+      `${BASE_URL}/drivers?q=${q}`,
+    );
 
     if (res.status !== "ok") {
       throw new Error(res.message);
@@ -114,13 +119,16 @@ export default function ReportDetail() {
     const values = form.getValues();
 
     try {
-      const res = await $fetch<UnitReport>(BASE_URL + "/daily-monitoring-units", {
-        method: "POST",
-        body: JSON.stringify(values),
-        headers: {
-          Authorization: `Bearer ${session}`,
+      const res = await $fetch<UnitReport>(
+        `${BASE_URL}/daily-monitoring-units`,
+        {
+          method: "POST",
+          body: JSON.stringify(values),
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
         },
-      });
+      );
 
       if (res.status === "fail") {
         throw new Error(res.message);
@@ -131,6 +139,7 @@ export default function ReportDetail() {
         queryKey: ["today-reports"],
       });
       router.back();
+      // biome-ignore lint/suspicious/noExplicitAny: exception not yet implemented
     } catch (e: any) {
       Alert.alert("Error", e.message, [
         {
@@ -201,7 +210,84 @@ export default function ReportDetail() {
             )}
           />
 
-          {form.getValues("conditions") && form.getValues("conditions").length > 0 ? (
+          <Controller
+            control={form.control}
+            name="status"
+            render={({ field: { onChange, onBlur, value } }) => (
+              <View style={{ flexDirection: "column", rowGap: 4 }}>
+                <Text variant="body1">Driver</Text>
+                <RadioGroup
+                  value={value}
+                  onValueChange={onChange}
+                  style={{ flexDirection: "row", columnGap: 10 }}
+                >
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      columnGap: 4,
+                      alignItems: "center",
+                    }}
+                  >
+                    <RadioGroupItem
+                      value="READY"
+                      selectedValue={value}
+                      onPress={(optValue) => {
+                        onChange(optValue);
+                        form.trigger("status");
+                      }}
+                    />
+                    <Text>Ready</Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      columnGap: 4,
+                      alignItems: "center",
+                    }}
+                  >
+                    <RadioGroupItem
+                      value="NOT READY"
+                      selectedValue={value}
+                      onPress={(optValue) => {
+                        onChange(optValue);
+                        form.trigger("status");
+                      }}
+                    />
+                    <Text>Not Ready</Text>
+                  </View>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      columnGap: 4,
+                      alignItems: "center",
+                    }}
+                  >
+                    <RadioGroupItem
+                      value="NOT READY"
+                      selectedValue={value}
+                      onPress={(optValue) => {
+                        onChange(optValue);
+                        form.trigger("status");
+                      }}
+                    />
+                    <Text>Needs Maintenance</Text>
+                  </View>
+                </RadioGroup>
+                {form.formState.errors.status && (
+                  <Text
+                    style={{
+                      color: Colors.dark.destructive,
+                    }}
+                  >
+                    {form.formState.errors.status.message}
+                  </Text>
+                )}
+              </View>
+            )}
+          />
+
+          {form.getValues("conditions") &&
+          form.getValues("conditions").length > 0 ? (
             form.getValues("conditions").map((uc, i) => (
               <Fragment key={uc.id}>
                 <Controller
@@ -271,7 +357,9 @@ export default function ReportDetail() {
                           onChange(text);
                           // Ensure this scrolls to the TextArea when focused
                           setTimeout(() => {
-                            scrollViewRef.current?.scrollToEnd({ animated: true });
+                            scrollViewRef.current?.scrollToEnd({
+                              animated: true,
+                            });
                           }, 100);
                         }}
                         value={value || undefined}
