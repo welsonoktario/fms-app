@@ -13,7 +13,7 @@
         "buildType": "apk"
       },
       "distribution": "internal",
-      "channel": "0513a567-106b-4f12-a7d0-98d8f30e9aa0"
+      "channel": "preview"
     },
     "production": {
       "autoIncrement": true
