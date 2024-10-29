@@ -68,12 +68,18 @@ export default function RootLayout() {
   }, []);
 
   useEffect(() => {
-    if (!isLoading && fontLoaded && !updateAvailable) {
-      SplashScreen.hideAsync();
+    if (__DEV__) {
+      if (!isLoading && fontLoaded) {
+        SplashScreen.hideAsync();
+      }
+    } else {
+      if (!isLoading && fontLoaded && !updateAvailable) {
+        SplashScreen.hideAsync();
+      }
     }
   }, [fontLoaded, isLoading, updateAvailable]);
 
-  if (!fontLoaded || isLoading || updateAvailable) {
+  if (!fontLoaded || isLoading || (!__DEV__ && updateAvailable)) {
     // While font or session is loading, or if an update is in progress, keep the screen blank
     return null;
   }

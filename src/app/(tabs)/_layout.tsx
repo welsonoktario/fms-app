@@ -1,17 +1,54 @@
 import { Icon } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
-import { applyAlpha } from "@/utils";
+import type { Unit } from "@/types";
+import { $fetch, applyAlpha } from "@/utils";
 import { Redirect, Tabs, useRouter } from "expo-router";
-import { useColorScheme } from "react-native";
+import { useEffect, useState } from "react";
+import { ActivityIndicator, View, useColorScheme } from "react-native";
 
 export default function ReportsLayout() {
   const router = useRouter();
-  const session = useSession();
+  const { session, isLoading, setUnit } = useSession();
   const colorScheme = useColorScheme();
 
-  if (!session.session) {
+  const [unitLoading, setUnitLoading] = useState(true);
+
+  useEffect(() => {
+    async function getUnit() {
+      const res = await $fetch<Unit>(
+        `${process.env.EXPO_PUBLIC_API_URL}/units`,
+        {
+          headers: {
+            Authorization: `Bearer ${session}`,
+          },
+        },
+      );
+
+      if (res.status === "fail") {
+        router.replace("/auth/sign-in");
+        return;
+      }
+
+      setUnit(res.data);
+      setUnitLoading(false);
+    }
+
+    if (!isLoading && session) {
+      getUnit();
+    }
+  }, [isLoading, session]);
+
+  if (!session) {
     return <Redirect href="/auth/sign-in" />;
+  }
+
+  if (isLoading || unitLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator />
+      </View>
+    );
   }
 
   return (

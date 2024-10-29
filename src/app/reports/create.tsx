@@ -219,7 +219,7 @@ export default function ReportDetail() {
                 <RadioGroup
                   value={value}
                   onValueChange={onChange}
-                  style={{ flexDirection: "row", columnGap: 10 }}
+                  style={{ flexDirection: "column", rowGap: 4 }}
                 >
                   <View
                     style={{
