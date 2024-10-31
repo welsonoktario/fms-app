@@ -1,11 +1,20 @@
-import { Card, CardContent, CardTitle, Text } from "@/components";
+import { Button, Card, CardContent, CardTitle, Text } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
 import type { UnitReportDriver } from "@/types";
-import { $fetch } from "@/utils";
+import { $fetch, isInProjectsLocation } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { getCurrentPositionAsync } from "expo-location";
+import { useRouter } from "expo-router";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Alert,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -47,12 +56,36 @@ const HistoryCard: React.FC<{ history: UnitReportDriver }> = ({ history }) => (
 );
 
 export default function History() {
-  const { session } = useSession();
+  const { session, unit } = useSession();
+  const router = useRouter();
+  const [checklistLoading, setChecklistLoading] = useState(false);
 
   const { data, isPending, refetch } = useQuery({
     queryKey: ["history"],
     queryFn: () => getHistory(session!),
   });
+
+  const dataLength = data ? Object.keys(data).length : undefined;
+
+  const handleAddChecklistPress = async () => {
+    setChecklistLoading(true);
+    if (unit?.project?.location && unit.project.radius) {
+      const location = await getCurrentPositionAsync();
+
+      if (isInProjectsLocation(unit.project, location.coords)) {
+        router.navigate("/reports/create");
+      } else {
+        Alert.alert("Error", "Anda berada diluar jangkauan proyek", [
+          {
+            text: "OK",
+          },
+        ]);
+      }
+    } else {
+      router.navigate("/(tabs)");
+    }
+    setChecklistLoading(false);
+  };
 
   return (
     <ScrollView
@@ -60,29 +93,57 @@ export default function History() {
         flexDirection: "column",
         rowGap: 8,
         padding: 20,
+        flex: 1,
       }}
       refreshControl={
         <RefreshControl refreshing={isPending} onRefresh={refetch} />
       }
     >
-      {data &&
-        Object.entries(data).map(([date, histories]) => (
-          <View key={date}>
-            <Text>{date}</Text>
-            <View
-              style={{
-                marginTop: 8,
-                flexDirection: "column",
-                rowGap: 8,
-                marginBottom: 16,
-              }}
-            >
-              {histories.map((history) => (
-                <HistoryCard key={`history-${history.id}`} history={history} />
-              ))}
+      {data ? (
+        dataLength! > 0 ? (
+          Object.entries(data).map(([date, histories]) => (
+            <View key={date}>
+              <Text>{date}</Text>
+              <View
+                style={{
+                  marginTop: 8,
+                  flexDirection: "column",
+                  rowGap: 8,
+                  marginBottom: 16,
+                }}
+              >
+                {histories.map((history) => (
+                  <HistoryCard
+                    key={`history-${history.id}`}
+                    history={history}
+                  />
+                ))}
+              </View>
             </View>
+          ))
+        ) : (
+          <View
+            style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          >
+            <Text>Belum ada riwayat checklist</Text>
+            <Button
+              style={{ marginTop: 16 }}
+              onPress={() => {
+                handleAddChecklistPress();
+              }}
+              disabled={checklistLoading}
+            >
+              Tambah Checklist
+            </Button>
           </View>
-        ))}
+        )
+      ) : (
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+        >
+          <ActivityIndicator />
+        </View>
+      )}
     </ScrollView>
   );
 }

@@ -9,10 +9,10 @@ import {
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks/useSession";
 import type { UnitReportDriver } from "@/types";
-import { $fetch, applyAlpha } from "@/utils";
-import { calculateDistance } from "@/utils/spatial";
+import { $fetch, applyAlpha, isInProjectsLocation } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
+import Constants from "expo-constants";
 import {
   type LocationObject,
   getCurrentPositionAsync,
@@ -20,13 +20,21 @@ import {
 } from "expo-location";
 import { useRouter } from "expo-router";
 import React, { useEffect, useRef, useState } from "react";
-import { Alert, RefreshControl, ScrollView, View } from "react-native";
+import {
+  Alert,
+  Platform,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 import MapView, {
   Callout,
   Circle,
   Marker,
   PROVIDER_GOOGLE,
 } from "react-native-maps";
+
+const isRunningInExpoGo = Constants.appOwnership === "expo";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -85,19 +93,10 @@ export default function Home() {
 
   const handleAddChecklist = async () => {
     const location = await getCurrentPositionAsync({});
-    const { latitude, longitude } = location.coords;
 
     if (unit?.project?.location && unit.project.radius) {
-      // Calculate distance
-      const distance = calculateDistance(
-        latitude,
-        longitude,
-        unit.project.location.coordinates[1],
-        unit.project.location.coordinates[0],
-      );
-
       // Check if distance is within the radius
-      if (distance <= unit.project.radius) {
+      if (isInProjectsLocation(unit.project, location.coords)) {
         router.navigate("/reports/create");
       } else {
         Alert.alert("Error", "Anda berada diluar jangkauan proyek", [
@@ -155,11 +154,14 @@ export default function Home() {
             mapRef.current = map;
           }}
           loadingEnabled={!location}
-          provider={PROVIDER_GOOGLE}
+          provider={
+            Platform.OS === "ios" && !isRunningInExpoGo
+              ? PROVIDER_GOOGLE
+              : undefined
+          }
           style={{ width: "100%", height: "100%" }}
           loadingIndicatorColor={Colors.light.primary}
           showsUserLocation
-          followsUserLocation
         >
           {unit?.project?.location?.coordinates && unit.project.radius ? (
             <>
