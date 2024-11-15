@@ -39,3 +39,33 @@ export async function $fetch<TData>(
   // Parse the response as JSON and return the typed data
   return (await response.json()) as ApiResponse<TData>;
 }
+
+export function objectToFormData(
+  obj: Record<string, any>, // Object to convert
+  formData: FormData = new FormData(), // Initial FormData object
+  parentKey = "", // Parent key for nested objects/arrays
+): FormData {
+  for (const key in obj) {
+    if (Object.hasOwn(obj, key)) {
+      const value = obj[key];
+      const fieldKey = parentKey ? `${parentKey}[${key}]` : key;
+
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          const arrayKey = `${fieldKey}[${index}]`;
+          objectToFormData(item, formData, arrayKey);
+        });
+      } else if (
+        value &&
+        typeof value === "object" &&
+        !(value instanceof File || value instanceof Blob)
+      ) {
+        objectToFormData(value, formData, fieldKey);
+      } else if (value !== null && value !== undefined) {
+        formData.append(fieldKey, value as string | Blob);
+      }
+    }
+  }
+
+  return formData;
+}

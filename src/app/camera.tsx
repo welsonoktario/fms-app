@@ -22,7 +22,7 @@ export default function Camera() {
   const [flashOn, setFlashOn] = useState<FlashMode>("off");
   const [zoom, setZoom] = useState(0);
   const [lastZoom, setLastZoom] = useState(0);
-  const { takenPicture, setTakenPicture } = useCameraStore();
+  const { setTakenPicture } = useCameraStore();
   const router = useRouter();
 
   useEffect(() => {
@@ -48,19 +48,19 @@ export default function Camera() {
 
       setZoom(newZoom);
     },
-    [zoom, setZoom, lastZoom, setLastZoom]
+    [zoom, setZoom, lastZoom, setLastZoom],
   );
 
   const onPinchEnd = useCallback(
     (event: GestureUpdateEvent<PinchGestureHandlerEventPayload>) => {
       setLastZoom(zoom);
     },
-    [zoom, setLastZoom]
+    [zoom, setLastZoom],
   );
 
   const pinchGesture = useMemo(
     () => Gesture.Pinch().onUpdate(onPinch).onEnd(onPinchEnd),
-    [onPinch, onPinchEnd]
+    [onPinch, onPinchEnd],
   );
 
   if (!permission) {
@@ -84,7 +84,10 @@ export default function Camera() {
 
   const takePicture = async () => {
     const picture = await cameraRef.current?.takePictureAsync({
-      quality: 50,
+      quality: 0,
+      imageType: "jpg",
+      scale: 1,
+      exif: true,
     });
 
     if (picture) {
@@ -128,7 +131,11 @@ export default function Camera() {
                 justifyContent: "center",
               }}
             >
-              <Button style={{ width: 64, height: 64 }} onPress={takePicture} size="icon">
+              <Button
+                style={{ width: 64, height: 64 }}
+                onPress={takePicture}
+                size="icon"
+              >
                 <Icon name="camera" size={32} />
               </Button>
             </View>

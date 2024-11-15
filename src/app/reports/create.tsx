@@ -12,7 +12,7 @@ import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
 import { useCameraStore } from "@/stores/camera-store";
 import type { UnitCondition, UnitReport } from "@/types";
-import { $fetch } from "@/utils";
+import { $fetch, objectToFormData } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -46,7 +46,11 @@ const schema = z.object({
     }),
   ),
   status: z
-    .union([z.literal("READY"), z.literal("NOT READY")])
+    .union([
+      z.literal("READY"),
+      z.literal("NOT READY"),
+      z.literal("NEEDS MAINTENANCE"),
+    ])
     .default("READY"),
   issue: z.string().nullable(),
   location: z
@@ -116,21 +120,33 @@ export default function ReportDetail() {
   });
 
   const onSubmit = async () => {
-    const location = await getCurrentPositionAsync({});
+    const location = await getCurrentPositionAsync();
     const { latitude, longitude } = location.coords;
     form.setValue("location.lat", latitude);
     form.setValue("location.lng", longitude);
 
     const values = form.getValues();
 
+    const formData = objectToFormData(values);
+    formData.append("photo", {
+      uri:
+        Platform.OS === "android"
+          ? takenPicture!.uri
+          : takenPicture!.uri.replace("file://", ""),
+      name: "checklist.jpg",
+      type: "image/jpeg",
+    } as any);
+
     try {
       const res = await $fetch<UnitReport>(
         `${BASE_URL}/daily-monitoring-units`,
         {
           method: "POST",
-          body: JSON.stringify(values),
+          body: formData,
           headers: {
+            Accept: "application/json",
             Authorization: `Bearer ${session}`,
+            "Content-Type": "multipart/form-data",
           },
         },
       );
@@ -268,7 +284,7 @@ export default function ReportDetail() {
                     }}
                   >
                     <RadioGroupItem
-                      value="NOT READY"
+                      value="NEEDS MAINTENANCE"
                       selectedValue={value}
                       onPress={(optValue) => {
                         onChange(optValue);
