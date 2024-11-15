@@ -1,6 +1,7 @@
 import {
   AutoComplete,
   Button,
+  Icon,
   RadioGroup,
   RadioGroupItem,
   Text,
@@ -9,8 +10,9 @@ import {
 } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
+import { useCameraStore } from "@/stores/camera-store";
 import type { UnitCondition, UnitReport } from "@/types";
-import { $fetch } from "@/utils";
+import { $fetch, objectToFormData } from "@/utils";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -21,8 +23,10 @@ import { Controller, useForm } from "react-hook-form";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   KeyboardAvoidingView,
   Platform,
+  Pressable,
   ScrollView,
   View,
 } from "react-native";
@@ -42,7 +46,11 @@ const schema = z.object({
     }),
   ),
   status: z
-    .union([z.literal("READY"), z.literal("NOT READY")])
+    .union([
+      z.literal("READY"),
+      z.literal("NOT READY"),
+      z.literal("NEEDS MAINTENANCE"),
+    ])
     .default("READY"),
   issue: z.string().nullable(),
   location: z
@@ -61,6 +69,7 @@ export default function ReportDetail() {
   const scrollViewRef = useRef<ScrollView>(null);
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { takenPicture } = useCameraStore();
 
   const getUnitConditions = async () => {
     const res = await $fetch<UnitCondition[]>(`${BASE_URL}/unit-conditions`);
@@ -111,21 +120,33 @@ export default function ReportDetail() {
   });
 
   const onSubmit = async () => {
-    const location = await getCurrentPositionAsync({});
+    const location = await getCurrentPositionAsync();
     const { latitude, longitude } = location.coords;
     form.setValue("location.lat", latitude);
     form.setValue("location.lng", longitude);
 
     const values = form.getValues();
 
+    const formData = objectToFormData(values);
+    formData.append("photo", {
+      uri:
+        Platform.OS === "android"
+          ? takenPicture!.uri
+          : takenPicture!.uri.replace("file://", ""),
+      name: "checklist.jpg",
+      type: "image/jpeg",
+    } as any);
+
     try {
       const res = await $fetch<UnitReport>(
         `${BASE_URL}/daily-monitoring-units`,
         {
           method: "POST",
-          body: JSON.stringify(values),
+          body: formData,
           headers: {
+            Accept: "application/json",
             Authorization: `Bearer ${session}`,
+            "Content-Type": "multipart/form-data",
           },
         },
       );
@@ -263,7 +284,7 @@ export default function ReportDetail() {
                     }}
                   >
                     <RadioGroupItem
-                      value="NOT READY"
+                      value="NEEDS MAINTENANCE"
                       selectedValue={value}
                       onPress={(optValue) => {
                         onChange(optValue);
@@ -401,6 +422,55 @@ export default function ReportDetail() {
               </View>
             )}
           />
+
+          <View>
+            <Text>Foto Unit</Text>
+            <Pressable
+              style={{ marginTop: 4 }}
+              onPress={() => {
+                router.navigate("/camera");
+              }}
+            >
+              {takenPicture ? (
+                <View style={{ overflow: "hidden", borderRadius: 8 }}>
+                  <Image
+                    source={{
+                      uri: takenPicture.uri,
+                    }}
+                    resizeMode="cover"
+                    style={{
+                      width: "100%",
+                      aspectRatio: "9/16",
+                    }}
+                  />
+                </View>
+              ) : (
+                <View
+                  style={{
+                    borderStyle: "dashed",
+                    borderWidth: 1,
+                    borderColor: "#A9A9A9",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                  }}
+                >
+                  <View
+                    style={{
+                      flex: 1,
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginVertical: 52,
+                    }}
+                  >
+                    <Icon name="image" size={44} color="#A9A9A9" />
+                    <Text style={{ marginTop: 16, color: "#A9A9A9" }}>
+                      Ambil foto dari kamera
+                    </Text>
+                  </View>
+                </View>
+              )}
+            </Pressable>
+          </View>
 
           <Button
             style={{ marginTop: 8 }}

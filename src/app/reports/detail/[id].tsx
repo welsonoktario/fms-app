@@ -35,6 +35,7 @@ export default function ReportDetail() {
     enabled: !!id && !!session,
     queryFn: () => getUnitReport(session!, id.toString()),
   });
+
   return (
     <ScrollView
       refreshControl={

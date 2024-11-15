@@ -1,7 +1,7 @@
 import { Button, Card, CardContent, CardTitle, Text } from "@/components";
 import { Colors } from "@/constants/Colors";
 import { useSession } from "@/hooks";
-import type { UnitReportDriver } from "@/types";
+import type { UnitReport, UnitReportDriver } from "@/types";
 import { $fetch, isInProjectsLocation } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
@@ -32,28 +32,39 @@ const getHistory = async (session: string): Promise<HistoryType> => {
   return res.data;
 };
 
-const HistoryCard: React.FC<{ history: UnitReportDriver }> = ({ history }) => (
-  <Card key={`history-${history.id}`}>
-    <CardTitle>{formatDate(history.created_at!, "dd-MM-y")}</CardTitle>
-    <CardContent>
-      <Text>Driver: {history.driver.name}</Text>
-      <Text>
-        Status:{" "}
-        <Text
-          style={{
-            color:
-              history.status_unit === "READY"
-                ? Colors.light.primary
-                : Colors.light.destructive,
-          }}
-        >
-          {history.status_unit}
+const HistoryCard: React.FC<{ history: UnitReportDriver }> = ({ history }) => {
+  const router = useRouter();
+  const statusColorMap: Record<UnitReport["status_unit"], string> = {
+    READY: Colors.light.primary,
+    "NOT READY": Colors.light.destructive,
+    "NEEDS MAINTENANCE": "#F09F0A",
+  };
+
+  return (
+    <Card
+      key={`history-${history.id}`}
+      onPress={() => {
+        router.navigate(`/reports/detail/${history.id}`);
+      }}
+    >
+      <CardTitle>{formatDate(history.created_at!, "dd-MM-y")}</CardTitle>
+      <CardContent>
+        <Text>Driver: {history.driver.name}</Text>
+        <Text>
+          Status:{" "}
+          <Text
+            style={{
+              color: statusColorMap[history.status_unit],
+            }}
+          >
+            {history.status_unit}
+          </Text>
         </Text>
-      </Text>
-      <Text>Isu: {history.issue || "-"}</Text>
-    </CardContent>
-  </Card>
-);
+        <Text>Isu: {history.issue || "-"}</Text>
+      </CardContent>
+    </Card>
+  );
+};
 
 export default function History() {
   const { session, unit } = useSession();

@@ -103,7 +103,7 @@ export type UnitReport = {
   user_id: number;
   conditions: UnitReportCondition[];
   issue: string | null;
-  status_unit: "READY" | "NOT READY";
+  status_unit: "READY" | "NOT READY" | "NEEDS MAINTENANCE";
   created_at?: string;
   unit?: Unit | null;
   driver?: Driver | null;

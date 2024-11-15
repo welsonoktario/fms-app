@@ -122,7 +122,16 @@ export default function RootLayout() {
 
               <Stack.Screen
                 name="reports/detail/[id]"
-                options={{ headerTitle: "Detail Checklist" }}
+                options={{
+                  headerTitle: "Detail Checklist",
+                }}
+              />
+
+              <Stack.Screen
+                name="camera"
+                options={{
+                  headerTitle: "Ambil Foto Unit",
+                }}
               />
 
               <Stack.Screen name="+not-found" />
