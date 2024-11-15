@@ -39,7 +39,8 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
   const [suggestionsList, setSuggestionsList] = useState<
     AutocompleteDropdownItem[] | null
   >(null);
-  const [selectedItem, setSelectedItem] = useState<AutocompleteDropdownItem | null>(null);
+  const [selectedItem, setSelectedItem] =
+    useState<AutocompleteDropdownItem | null>(null);
   const scheme = useColorScheme();
 
   const getSuggestions = useCallback(
@@ -53,7 +54,7 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
       setSuggestionsList(suggestions);
       setLoading(false);
     },
-    [fetchSuggestions]
+    [fetchSuggestions],
   );
 
   const onClearPress = useCallback(() => {
@@ -105,7 +106,9 @@ export const AutoComplete: React.FC<AutocompleteProps> = ({
         }}
         containerStyle={{ flexGrow: 1, flexShrink: 1 }}
         renderItem={(item, text) => (
-          <Text style={{ color: themeColors.text, padding: 15 }}>{item.title}</Text>
+          <Text style={{ color: themeColors.text, padding: 15 }}>
+            {item.title}
+          </Text>
         )}
         inputHeight={120}
         showChevron={false}

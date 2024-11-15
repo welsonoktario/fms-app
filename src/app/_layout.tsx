@@ -12,7 +12,8 @@ import { QueryClient } from "@tanstack/query-core";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { setDefaultOptions } from "date-fns";
 import { id } from "date-fns/locale";
-import { useEffect } from "react";
+import * as Updates from "expo-updates";
+import { useEffect, useState } from "react";
 import { AutocompleteDropdownContextProvider } from "react-native-autocomplete-dropdown";
 
 /* export const unstable_settings = {
@@ -41,14 +42,45 @@ export default function RootLayout() {
     "Geist-UltraBlack": require("../assets/fonts/Geist-UltraBlack.ttf"),
   });
   const { isLoading } = useSession();
+  const [updateAvailable, setUpdateAvailable] = useState(false);
 
   useEffect(() => {
-    if (!isLoading && fontLoaded) {
-      SplashScreen.hideAsync();
-    }
-  }, [fontLoaded, isLoading]);
+    async function checkAndApplyUpdates() {
+      try {
+        // Check if an update is available
+        const update = await Updates.checkForUpdateAsync();
 
-  if (!fontLoaded || isLoading) {
+        if (update.isAvailable) {
+          setUpdateAvailable(true);
+          // Download the update
+          await Updates.fetchUpdateAsync();
+          // Apply the update (you can choose to reload the app right after)
+          await Updates.reloadAsync();
+        }
+      } catch (error) {
+        console.error("Error checking or applying updates", error);
+      }
+    }
+
+    if (!__DEV__) {
+      checkAndApplyUpdates();
+    }
+  }, []);
+
+  useEffect(() => {
+    if (__DEV__) {
+      if (!isLoading && fontLoaded) {
+        SplashScreen.hideAsync();
+      }
+    } else {
+      if (!isLoading && fontLoaded && !updateAvailable) {
+        SplashScreen.hideAsync();
+      }
+    }
+  }, [fontLoaded, isLoading, updateAvailable]);
+
+  if (!fontLoaded || isLoading || (!__DEV__ && updateAvailable)) {
+    // While font or session is loading, or if an update is in progress, keep the screen blank
     return null;
   }
 
@@ -76,7 +108,10 @@ export default function RootLayout() {
                 }}
               />
 
-              <Stack.Screen name="auth/sign-in" options={{ headerShown: false }} />
+              <Stack.Screen
+                name="auth/sign-in"
+                options={{ headerShown: false }}
+              />
 
               <Stack.Screen
                 name="reports/create"

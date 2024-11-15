@@ -13,36 +13,38 @@ type TextAreaProps = TextInputProps & {
   style?: StyleProp<TextStyle>;
 };
 
-const TextArea = forwardRef<TextInput, TextAreaProps>(({ style, ...props }, ref) => {
-  const colorScheme = useColorScheme();
-  const [focused, setFocused] = useState(false);
-  const placeholderTextColor = Colors[colorScheme || "light"].mutedForeground;
-  const textColor = Colors[colorScheme || "light"].text;
-  const backgroundColor = Colors[colorScheme || "light"].background;
+const TextArea = forwardRef<TextInput, TextAreaProps>(
+  ({ style, ...props }, ref) => {
+    const colorScheme = useColorScheme();
+    const [focused, setFocused] = useState(false);
+    const placeholderTextColor = Colors[colorScheme || "light"].mutedForeground;
+    const textColor = Colors[colorScheme || "light"].text;
+    const backgroundColor = Colors[colorScheme || "light"].background;
 
-  return (
-    <TextInput
-      ref={ref}
-      selectionColor={Colors[colorScheme || "light"].primary}
-      placeholderTextColor={placeholderTextColor}
-      style={[
-        styles.textarea,
-        {
-          color: textColor,
-          backgroundColor,
-          borderColor: focused
-            ? Colors[colorScheme || "light"].ring
-            : Colors[colorScheme || "light"].border,
-        },
-        style,
-      ]}
-      onFocus={() => setFocused(true)}
-      onBlur={() => setFocused(false)}
-      multiline
-      {...props}
-    />
-  );
-});
+    return (
+      <TextInput
+        ref={ref}
+        selectionColor={Colors[colorScheme || "light"].primary}
+        placeholderTextColor={placeholderTextColor}
+        style={[
+          styles.textarea,
+          {
+            color: textColor,
+            backgroundColor,
+            borderColor: focused
+              ? Colors[colorScheme || "light"].ring
+              : Colors[colorScheme || "light"].border,
+          },
+          style,
+        ]}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        multiline
+        {...props}
+      />
+    );
+  },
+);
 TextArea.displayName = "TextArea";
 
 const styles = StyleSheet.create({

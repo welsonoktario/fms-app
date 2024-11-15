@@ -36,9 +36,11 @@ type CardHeaderProps = ViewProps & {
   style?: StyleProp<ViewStyle>;
 };
 
-const CardHeader = React.forwardRef<View, CardHeaderProps>(({ style, ...props }, ref) => {
-  return <View ref={ref} style={[styles.cardHeader, style]} {...props} />;
-});
+const CardHeader = React.forwardRef<View, CardHeaderProps>(
+  ({ style, ...props }, ref) => {
+    return <View ref={ref} style={[styles.cardHeader, style]} {...props} />;
+  },
+);
 CardHeader.displayName = "CardHeader";
 
 type CardTitleProps = TextProps & {
@@ -74,7 +76,7 @@ type CardContentProps = ViewProps & {
 const CardContent = React.forwardRef<View, CardContentProps>(
   ({ style, ...props }, ref) => {
     return <View ref={ref} style={[styles.cardContent, style]} {...props} />;
-  }
+  },
 );
 CardContent.displayName = "CardContent";
 
@@ -82,9 +84,11 @@ type CardFooterProps = ViewProps & {
   style?: StyleProp<ViewStyle>;
 };
 
-const CardFooter = React.forwardRef<View, CardFooterProps>(({ style, ...props }, ref) => {
-  return <View ref={ref} style={[styles.cardFooter, style]} {...props} />;
-});
+const CardFooter = React.forwardRef<View, CardFooterProps>(
+  ({ style, ...props }, ref) => {
+    return <View ref={ref} style={[styles.cardFooter, style]} {...props} />;
+  },
+);
 CardFooter.displayName = "CardFooter";
 
 const styles = StyleSheet.create({
@@ -124,4 +128,11 @@ const styles = StyleSheet.create({
   },
 });
 
-export { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle };
+export {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+};

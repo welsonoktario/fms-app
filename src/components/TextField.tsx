@@ -14,35 +14,36 @@ interface TextFieldProps extends TextInputProps {
   style?: StyleProp<TextStyle>; // Custom style prop
 }
 
-const TextField: React.FC<TextFieldProps> = React.forwardRef<TextInput, TextFieldProps>(
-  ({ style, ...props }, ref) => {
-    const scheme = useColorScheme();
-    const [focused, setFocused] = useState(false);
-    const placeholderTextColor = Colors[scheme || "light"].mutedForeground;
+const TextField: React.FC<TextFieldProps> = React.forwardRef<
+  TextInput,
+  TextFieldProps
+>(({ style, ...props }, ref) => {
+  const scheme = useColorScheme();
+  const [focused, setFocused] = useState(false);
+  const placeholderTextColor = Colors[scheme || "light"].mutedForeground;
 
-    return (
-      <TextInput
-        ref={ref}
-        selectionColor={Colors[scheme || "light"].primary}
-        placeholderTextColor={placeholderTextColor}
-        style={[
-          styles.input,
-          {
-            color: Colors[scheme || "light"].text,
-            backgroundColor: Colors[scheme || "light"].background,
-            borderColor: focused
-              ? Colors[scheme || "light"].ring
-              : Colors[scheme || "light"].border,
-          },
-          style,
-        ]}
-        onFocus={() => setFocused(true)}
-        onBlur={() => setFocused(false)}
-        {...props}
-      />
-    );
-  }
-);
+  return (
+    <TextInput
+      ref={ref}
+      selectionColor={Colors[scheme || "light"].primary}
+      placeholderTextColor={placeholderTextColor}
+      style={[
+        styles.input,
+        {
+          color: Colors[scheme || "light"].text,
+          backgroundColor: Colors[scheme || "light"].background,
+          borderColor: focused
+            ? Colors[scheme || "light"].ring
+            : Colors[scheme || "light"].border,
+        },
+        style,
+      ]}
+      onFocus={() => setFocused(true)}
+      onBlur={() => setFocused(false)}
+      {...props}
+    />
+  );
+});
 
 const styles = StyleSheet.create({
   input: {

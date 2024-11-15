@@ -25,10 +25,42 @@ export type UnitCondition = {
   name: string;
 };
 
+export type Geometry =
+  | {
+      type: "Point";
+      coordinates: [number, number]; // A single pair of coordinates [longitude, latitude]
+    }
+  | {
+      type: "LineString";
+      coordinates: [number, number][]; // An array of [longitude, latitude] pairs
+    }
+  | {
+      type: "Polygon";
+      coordinates: [number, number][][]; // An array of arrays of [longitude, latitude] pairs (outer and inner rings)
+    }
+  | {
+      type: "MultiPoint";
+      coordinates: [number, number][]; // An array of points
+    }
+  | {
+      type: "MultiLineString";
+      coordinates: [number, number][][]; // An array of arrays of points
+    }
+  | {
+      type: "MultiPolygon";
+      coordinates: [number, number][][][]; // An array of arrays of polygons
+    }
+  | {
+      type: "GeometryCollection";
+      geometries: Geometry[]; // A collection of multiple geometries
+    };
+
 export type Project = {
   id: number;
   name: string;
   timezone: "WIB" | "WITA" | "WIT";
+  location?: Extract<Geometry, { type: "Point" }>;
+  radius?: number;
 };
 
 export type Unit = {
@@ -73,8 +105,8 @@ export type UnitReport = {
   issue: string | null;
   status_unit: "READY" | "NOT READY";
   created_at?: string;
-  unit?: Unit | null,
-  driver?: Driver | null
+  unit?: Unit | null;
+  driver?: Driver | null;
 };
 
 export type Driver = {
