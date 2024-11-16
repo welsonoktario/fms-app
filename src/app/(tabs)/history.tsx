@@ -104,7 +104,6 @@ export default function History() {
         flexDirection: "column",
         rowGap: 8,
         padding: 20,
-        flex: 1,
       }}
       refreshControl={
         <RefreshControl refreshing={isPending} onRefresh={refetch} />
