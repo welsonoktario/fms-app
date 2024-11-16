@@ -101,6 +101,7 @@ export default function History() {
   return (
     <ScrollView
       contentContainerStyle={{
+        flexGrow: 1,
         flexDirection: "column",
         rowGap: 8,
         padding: 20,

@@ -5,7 +5,7 @@ import { $fetch } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { useLocalSearchParams } from "expo-router";
-import { RefreshControl, ScrollView, View } from "react-native";
+import { Image, RefreshControl, ScrollView, View } from "react-native";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -85,6 +85,22 @@ export default function ReportDetail() {
               </>
             ))}
           </View>
+          {data.photo ? (
+            <View>
+              <Text variant="h5">Foto Unit</Text>
+              <View style={{ width: "100%" }}>
+                <Image
+                  source={{
+                    uri: data.photo,
+                  }}
+                  style={{
+                    width: "100%",
+                    aspectRatio: "9/16",
+                  }}
+                />
+              </View>
+            </View>
+          ) : null}
         </View>
       ) : null}
     </ScrollView>

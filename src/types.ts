@@ -104,6 +104,7 @@ export type UnitReport = {
   conditions: UnitReportCondition[];
   issue: string | null;
   status_unit: "READY" | "NOT READY" | "NEEDS MAINTENANCE";
+  photo?: string | null;
   created_at?: string;
   unit?: Unit | null;
   driver?: Driver | null;
