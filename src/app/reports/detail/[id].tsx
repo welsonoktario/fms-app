@@ -5,7 +5,14 @@ import { $fetch } from "@/utils";
 import { useQuery } from "@tanstack/react-query";
 import { formatDate } from "date-fns";
 import { useLocalSearchParams } from "expo-router";
-import { Image, RefreshControl, ScrollView, View } from "react-native";
+import { useState } from "react";
+import {
+  ActivityIndicator,
+  Image,
+  RefreshControl,
+  ScrollView,
+  View,
+} from "react-native";
 
 const BASE_URL = process.env.EXPO_PUBLIC_API_URL;
 
@@ -29,6 +36,7 @@ const getUnitReport = async (session: string, id: string) => {
 export default function ReportDetail() {
   const { id } = useLocalSearchParams();
   const { session } = useSession();
+  const [isImageLoading, setIsImageLoading] = useState(true);
 
   const { data, isPending, refetch } = useQuery({
     queryKey: ["reports", id],
@@ -42,7 +50,7 @@ export default function ReportDetail() {
         <RefreshControl refreshing={isPending} onRefresh={refetch} />
       }
       contentContainerStyle={{
-        flex: 1,
+        flexGrow: 1,
         flexDirection: "column",
         rowGap: 16,
         padding: 20,
@@ -88,10 +96,23 @@ export default function ReportDetail() {
           {data.photo ? (
             <View>
               <Text variant="h5">Foto Unit</Text>
-              <View style={{ width: "100%" }}>
+              <View
+                style={{
+                  width: "100%",
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  justifyContent: "center",
+                }}
+              >
+                {isImageLoading ? (
+                  <ActivityIndicator style={{ marginTop: 16 }} />
+                ) : null}
                 <Image
                   source={{
                     uri: data.photo,
+                  }}
+                  onLoadEnd={() => {
+                    setIsImageLoading(false);
                   }}
                   style={{
                     width: "100%",
