@@ -19,7 +19,7 @@ const Icon: React.FC<IconProps> = ({ name, size = 24, color, style }) => {
     <VectorIcon
       name={name}
       size={size}
-      color={color || Colors[colorScheme || "light"].text}
+      color={color || Colors[colorScheme || "light"].background}
       style={[defaultStyle, style]}
     />
   );
